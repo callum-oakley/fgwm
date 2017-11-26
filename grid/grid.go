@@ -69,8 +69,6 @@ type Grid struct {
 //          |                            |                            |
 //          A                            B                            C
 //
-// The points attribute would list the points A, B, C above -- i.e. the cell
-// boundaries.
 
 type Options struct {
 	Border    wmutils.Size
@@ -96,22 +94,12 @@ func New(opts *Options) (*Grid, error) {
 		W: (screen.W - wmutils.Pixels(opts.Size.W)*cell.W) / 2,
 		H: (screen.H - wmutils.Pixels(opts.Size.H)*cell.H) / 2,
 	}
-	points := make(map[Position]wmutils.Position)
-	for x := 0; x <= opts.Size.W; x++ {
-		for y := 0; y <= opts.Size.H; y++ {
-			points[Position{x, y}] = wmutils.Position{
-				X: margin.W + wmutils.Pixels(x)*cell.W,
-				Y: margin.H + wmutils.Pixels(y)*cell.H,
-			}
-		}
-	}
 	return &Grid{
 		screen: screen,
 		margin: margin,
 		border: opts.Border,
 		pad:    opts.Pad,
 		cell:   cell,
-		points: points,
 		size:   opts.Size,
 	}, nil
 }
@@ -161,13 +149,6 @@ func restriction(n, min, max int) int {
 	return n
 }
 
-func (g *Grid) pixelSize(size Size) wmutils.Size {
-	return wmutils.Size{
-		W: wmutils.Pixels(size.W) * g.cell.W,
-		H: wmutils.Pixels(size.H) * g.cell.H,
-	}
-}
-
 func (g *Grid) Center(wid wmutils.WindowID) error {
 	center := Position{g.size.W / 2, g.size.H / 2}
 	tl, br, err := g.GetAttributes(wid)
@@ -207,7 +188,26 @@ func (g *Grid) Throw(wid wmutils.WindowID, direction Direction) error {
 			Position{br.X, g.size.H},
 		)
 	default:
-		return fmt.Errorf("Unknown direction '%v'", direction)
+		return fmt.Errorf("Unsupported direction '%v'", direction)
+	}
+}
+
+func (g *Grid) Spread(wid wmutils.WindowID, direction Direction) error {
+	tl, br, err := g.GetAttributes(wid)
+	if err != nil {
+		return err
+	}
+	switch direction {
+	case Left:
+		return g.Teleport(wid, Position{0, tl.Y}, br)
+	case Right:
+		return g.Teleport(wid, tl, Position{g.size.W, br.Y})
+	case Up:
+		return g.Teleport(wid, Position{tl.X, 0}, br)
+	case Down:
+		return g.Teleport(wid, tl, Position{br.X, g.size.H})
+	default:
+		return fmt.Errorf("Unsupported direction '%v'", direction)
 	}
 }
 
@@ -215,13 +215,27 @@ func (g *Grid) inGrid(p Position) bool {
 	return 0 <= p.X && p.X <= g.size.W && 0 <= p.Y && p.Y <= g.size.H
 }
 
+func (g *Grid) pixelSize(size Size) wmutils.Size {
+	return wmutils.Size{
+		W: wmutils.Pixels(size.W) * g.cell.W,
+		H: wmutils.Pixels(size.H) * g.cell.H,
+	}
+}
+
+func (g *Grid) pixelPosition(pos Position) wmutils.Position {
+	return wmutils.Position{
+		X: g.margin.W + wmutils.Pixels(pos.X)*g.cell.W,
+		Y: g.margin.H + wmutils.Pixels(pos.Y)*g.cell.H,
+	}
+}
+
 func (g *Grid) Teleport(wid wmutils.WindowID, tl Position, br Position) error {
-	if !g.inGrid(tl) || !g.inGrid(br) {
+	if !g.inGrid(tl) || !g.inGrid(br) || tl.X >= br.X || tl.Y >= br.Y {
 		return nil
 	}
 	return wmutils.Teleport(
 		wid,
-		g.points[tl].Offset(g.pad),
+		g.pixelPosition(tl).Offset(g.pad),
 		g.pixelSize(br.Diff(tl)).Add(g.pad.Add(g.border).Scale(-2)),
 	)
 }

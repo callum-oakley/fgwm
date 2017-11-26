@@ -12,7 +12,7 @@ func main() {
 		Border:    wmutils.Size{5, 5},
 		MinMargin: wmutils.Size{10, 10},
 		Pad:       wmutils.Size{10, 10},
-		Size:      grid.Size{6, 6},
+		Size:      grid.Size{24, 24},
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = g.Throw(wid, grid.Right)
+	err = g.Snap(wid)
 	if err != nil {
 		log.Fatal(err)
 	}
