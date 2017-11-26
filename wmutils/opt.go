@@ -1,4 +1,4 @@
-package wm
+package wmutils
 
 import (
 	"fmt"

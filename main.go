@@ -1,24 +1,41 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
-	"github.com/hot-leaf-juice/fgwm/wm"
+	"github.com/hot-leaf-juice/fgwm/grid"
+	"github.com/hot-leaf-juice/fgwm/wmutils"
 )
 
 func main() {
-	for ev := range wm.WatchEvents() {
-		switch ev.Type {
-		case wm.CreateNotifyEvent:
-			fmt.Printf("Window created:   %v\n", ev.WID)
-		case wm.DestroyNotifyEvent:
-			fmt.Printf("Window destroyed: %v\n", ev.WID)
-		case wm.UnmapNotifyEvent:
-			fmt.Printf("Window unmapped:  %v\n", ev.WID)
-		case wm.MapNotifyEvent:
-			fmt.Printf("Window mapped:    %v\n", ev.WID)
-		}
+	g, err := grid.New(&grid.Options{
+		Border:    wmutils.Size{5, 5},
+		MinMargin: wmutils.Size{10, 10},
+		Pad:       wmutils.Size{10, 10},
+		Size:      grid.Size{6, 6},
+	})
+	if err != nil {
+		log.Fatal(err)
 	}
-	log.Fatal("Something went wrong! Event channel was closed...")
+	wid, err := wmutils.Focussed()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = g.Snap(wid)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// for ev := range wmutils.WatchEvents() {
+	// 	switch ev.Type {
+	// 	case wmutils.CreateNotifyEvent:
+	// 		fmt.Printf("Window created:   %v\n", ev.WID)
+	// 	case wmutils.DestroyNotifyEvent:
+	// 		fmt.Printf("Window destroyed: %v\n", ev.WID)
+	// 	case wmutils.UnmapNotifyEvent:
+	// 		fmt.Printf("Window unmapped:  %v\n", ev.WID)
+	// 	case wmutils.MapNotifyEvent:
+	// 		fmt.Printf("Window mapped:    %v\n", ev.WID)
+	// 	}
+	// }
+	// log.Fatal("Something went wrong! Event channel was closed...")
 }

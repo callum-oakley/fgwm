@@ -1,5 +1,5 @@
-// Package wm provides wrappers around https://github.com/wmutils
-package wm
+// Package wmutils provides wrappers around https://github.com/wmutils
+package wmutils
 
 import (
 	"fmt"
@@ -24,10 +24,20 @@ type Size struct {
 	H Pixels
 }
 
-// Focussed returns the WindowID of the currently focussed window. Wraps pfw.
-func Focussed() (WindowID, error) {
+func (p Position) Offset(s Size) Position {
+	return Position{p.X + s.W, p.Y + s.H}
+}
+
+func (a Size) Add(b Size) Size {
+	return Size{a.W + b.W, a.H + b.H}
+}
+
+func (a Size) Scale(k Pixels) Size {
+	return Size{k * a.W, k * a.H}
+}
+
+func fetchWID(cmd *exec.Cmd) (WindowID, error) {
 	var wid WindowID
-	cmd := exec.Command("pfw")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return 0, err
@@ -42,6 +52,16 @@ func Focussed() (WindowID, error) {
 		return 0, err
 	}
 	return wid, nil
+}
+
+// Focussed returns the WindowID of the currently focussed window. Wraps pfw.
+func Focussed() (WindowID, error) {
+	return fetchWID(exec.Command("pfw"))
+}
+
+// Root gets the window ID of the root window. Wraps lsw -r.
+func Root() (WindowID, error) {
+	return fetchWID(exec.Command("lsw", "-r"))
 }
 
 // Focus sets the keyboard input focus to the window with the given ID if it
@@ -83,10 +103,8 @@ func Toggle(wid WindowID) error {
 	return exec.Command("mapw", "-t", wid.String()).Run()
 }
 
-// IsIgnored returns true if and only if the window with the given ID has the
-// override_redirect attribute set. Wraps wattr o.
-func IsIgnored(wid WindowID) (bool, error) {
-	err := exec.Command("wattr", "o", wid.String()).Run()
+func exitStatusOk(cmd *exec.Cmd) (bool, error) {
+	err := cmd.Run()
 	if err != nil {
 		switch err.(type) {
 		case *exec.ExitError:
@@ -98,17 +116,43 @@ func IsIgnored(wid WindowID) (bool, error) {
 	return true, nil
 }
 
+// IsIgnored returns true if and only if the window with the given ID has the
+// override_redirect attribute set. Wraps wattr o.
+func IsIgnored(wid WindowID) (bool, error) {
+	return exitStatusOk(exec.Command("wattr", "o", wid.String()))
+}
+
 // Exists returns true if there is a window with the given ID, false otherwise.
 // Wraps wattr.
 func Exists(wid WindowID) (bool, error) {
-	err := exec.Command("wattr", wid.String()).Run()
+	return exitStatusOk(exec.Command("wattr", wid.String()))
+}
+
+// GetAttributes returns the size and position of the window with the given ID.
+// Wraps wattr xywh.
+func GetAttributes(wid WindowID) (Position, Size, error) {
+	var pos Position
+	var size Size
+	cmd := exec.Command("wattr", "xywh", wid.String())
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		switch err.(type) {
-		case *exec.ExitError:
-			return false, nil
-		default:
-			return false, err
-		}
+		return pos, size, err
 	}
-	return true, nil
+	if err := cmd.Start(); err != nil {
+		return pos, size, err
+	}
+	if _, err := fmt.Fscanf(
+		stdout,
+		"%v %v %v %v",
+		&pos.X,
+		&pos.Y,
+		&size.W,
+		&size.H,
+	); err != nil {
+		return pos, size, err
+	}
+	if err := cmd.Wait(); err != nil {
+		return pos, size, err
+	}
+	return pos, size, nil
 }
