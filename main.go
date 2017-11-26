@@ -8,14 +8,17 @@ import (
 )
 
 func main() {
-	wid, err := wm.Focussed()
-	if err != nil {
-		log.Fatal(err)
+	for ev := range wm.WatchEvents() {
+		switch ev.Type {
+		case wm.CreateNotifyEvent:
+			fmt.Printf("Window created:   %v\n", ev.WID)
+		case wm.DestroyNotifyEvent:
+			fmt.Printf("Window destroyed: %v\n", ev.WID)
+		case wm.UnmapNotifyEvent:
+			fmt.Printf("Window unmapped:  %v\n", ev.WID)
+		case wm.MapNotifyEvent:
+			fmt.Printf("Window mapped:    %v\n", ev.WID)
+		}
 	}
-	fmt.Printf("pfw: %v\n", wid)
-	wm.Teleport(
-		wid,
-		wm.Position{wm.Pixels(800), wm.Pixels(100)},
-		wm.Size{wm.Pixels(700), wm.Pixels(500)},
-	)
+	log.Fatal("Something went wrong! Event channel was closed...")
 }
