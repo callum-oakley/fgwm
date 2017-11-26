@@ -148,16 +148,6 @@ func (g *Grid) Snap(wid wmutils.WindowID) error {
 	return g.Move(wid, Size{0, 0})
 }
 
-func restriction(n, min, max int) int {
-	if n < min {
-		return min
-	}
-	if n > max {
-		return max
-	}
-	return n
-}
-
 func (g *Grid) Center(wid wmutils.WindowID) error {
 	center := Position{g.size.W / 2, g.size.H / 2}
 	tl, br, err := g.GetAttributes(wid)
