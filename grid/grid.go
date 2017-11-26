@@ -132,7 +132,16 @@ func (g *Grid) Grow(wid wmutils.WindowID, diff Size) error {
 	if err != nil {
 		return err
 	}
-	return g.Teleport(wid, tl.Offset(diff.Scale(-1)), br.Offset(diff))
+	if g.inGrid(tl.Offset(diff.Scale(-1))) && g.inGrid(br.Offset(diff)) {
+		return g.Teleport(wid, tl.Offset(diff.Scale(-1)), br.Offset(diff))
+	}
+	if g.inGrid(tl) && g.inGrid(br.Offset(diff.Scale(2))) {
+		return g.Teleport(wid, tl, br.Offset(diff.Scale(2)))
+	}
+	if g.inGrid(tl.Offset(diff.Scale(-2))) && g.inGrid(br) {
+		return g.Teleport(wid, tl.Offset(diff.Scale(-2)), br)
+	}
+	return nil
 }
 
 func (g *Grid) Snap(wid wmutils.WindowID) error {

@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = g.Snap(wid)
+	err = g.Grow(wid, grid.Size{0, 2})
 	if err != nil {
 		log.Fatal(err)
 	}
