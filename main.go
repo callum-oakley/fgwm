@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = g.Snap(wid)
+	err = g.Throw(wid, grid.Right)
 	if err != nil {
 		log.Fatal(err)
 	}
