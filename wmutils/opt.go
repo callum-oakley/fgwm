@@ -20,6 +20,7 @@ const (
 )
 
 // this doesn't do any cleanup yet...
+// TODO take a callback instead of returning a channel?
 func WatchEvents() <-chan Event {
 	evChan := make(chan Event)
 	// might want to use CommandContext to kill this and clean up when done
