@@ -15,13 +15,11 @@ func (wid WindowID) String() string {
 type Pixels int
 
 type Position struct {
-	X Pixels
-	Y Pixels
+	X, Y Pixels
 }
 
 type Size struct {
-	W Pixels
-	H Pixels
+	W, H Pixels
 }
 
 func (p Position) Offset(s Size) Position {

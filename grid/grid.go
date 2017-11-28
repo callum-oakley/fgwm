@@ -16,13 +16,11 @@ const (
 )
 
 type Position struct {
-	X int
-	Y int
+	X, Y int
 }
 
 type Size struct {
-	W int
-	H int
+	W, H int
 }
 
 func (p Position) Offset(s Size) Position {
