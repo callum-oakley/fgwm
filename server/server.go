@@ -10,10 +10,12 @@ import (
 )
 
 type Server struct {
+	name string
 	grid *grid.Grid
 }
 
 type Config struct {
+	Name string
 	Grid *grid.Options
 }
 
@@ -22,7 +24,7 @@ func Run(config *Config) error {
 	if err != nil {
 		return err
 	}
-	s := &Server{g}
+	s := &Server{config.Name, g}
 	rpc.Register(s)
 	rpc.HandleHTTP()
 	// TODO replace with named pipes
@@ -30,18 +32,7 @@ func Run(config *Config) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Listening on port localhost:62676")
+	fmt.Printf("%v: listening on localhost:62676\n", s.name)
 	http.Serve(listener, nil)
-	return nil
-}
-
-// Just testing
-
-type Args struct {
-	A, B int
-}
-
-func (s *Server) Multiply(args *Args, reply *int) error {
-	*reply = args.A * args.B
 	return nil
 }

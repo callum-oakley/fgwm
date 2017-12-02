@@ -12,10 +12,11 @@ import (
 
 func main() {
 	if len(os.Args) >= 2 {
-		client.RunOneShot(os.Args)
+		client.Run(os.Args)
 		return
 	}
 	if err := server.Run(&server.Config{
+		Name: os.Args[0],
 		Grid: &grid.Options{
 			Border:    wmutils.Size{5, 5},
 			MinMargin: wmutils.Size{10, 10},

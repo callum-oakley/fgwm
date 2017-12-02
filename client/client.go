@@ -10,61 +10,35 @@ import (
 
 	"github.com/hot-leaf-juice/fgwm/grid"
 	"github.com/hot-leaf-juice/fgwm/server"
-	"github.com/hot-leaf-juice/fgwm/wmutils"
 )
 
-type oneShotClient struct {
-	name     string
-	command  string
-	windowID wmutils.WindowID
-	grid     *grid.Grid
+type client struct {
+	name string
 }
 
-func RunOneShot(args []string) {
-	client, err := rpc.DialHTTP("tcp", "localhost:62676")
+func Run(args []string) {
+	conn, err := rpc.DialHTTP("tcp", "localhost:62676")
 	if err != nil {
 		log.Fatal(err)
 	}
-	rpcArgs := &server.Args{5, 6}
-	var reply int
-	err = client.Call("Server.Multiply", rpcArgs, &reply)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("result: %v\n", reply)
-	return
-	wid, err := wmutils.Focussed()
-	if err != nil {
-		log.Fatal(err)
-	}
-	g, err := grid.New(&grid.Options{
-		Border:    wmutils.Size{5, 5},
-		MinMargin: wmutils.Size{10, 10},
-		Pad:       wmutils.Size{10, 10},
-		Size:      grid.Size{24, 24},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	c := &oneShotClient{name: args[0], windowID: wid, grid: g}
-	c.command = args[1]
-	switch c.command {
+	c := client{args[0]}
+	switch args[1] {
 	case "snap":
-		c.noArgsHandler(c.grid.Snap, args[2:])
-	case "move":
-		c.sizeArgHandler(c.grid.Move, args[2:])
-	case "grow":
-		c.sizeArgHandler(c.grid.Grow, args[2:])
+		conn.Call("Server.Snap", c.noArgs(args[2:]), nil)
 	case "center":
-		c.noArgsHandler(c.grid.Center, args[2:])
-	case "throw":
-		c.directionArgHandler(c.grid.Throw, args[2:])
-	case "spread":
-		c.directionArgHandler(c.grid.Spread, args[2:])
-	case "teleport":
-		c.handleTeleport(args[2:])
+		conn.Call("Server.Center", c.noArgs(args[2:]), nil)
 	case "kill":
-		c.noArgsHandler(wmutils.Kill, args[2:])
+		conn.Call("Server.Kill", c.noArgs(args[2:]), nil)
+	case "move":
+		conn.Call("Server.Move", c.sizeArg(args[2:]), nil)
+	case "grow":
+		conn.Call("Server.Grow", c.sizeArg(args[2:]), nil)
+	case "throw":
+		conn.Call("Server.Throw", c.directionArg(args[2:]), nil)
+	case "spread":
+		conn.Call("Server.Spread", c.directionArg(args[2:]), nil)
+	case "teleport":
+		conn.Call("Server.Teleport", c.rectangleArg(args[2:]), nil)
 	case "help":
 		c.printHelpAndExit(args[2:])
 	default:
@@ -72,44 +46,31 @@ func RunOneShot(args []string) {
 	}
 }
 
-func (c *oneShotClient) noArgsHandler(
-	f func(wid wmutils.WindowID) error,
-	args []string,
-) {
+func (c client) noArgs(args []string) struct{} {
 	if len(args) != 0 {
-		c.printHelpAndExit(args)
+		c.printHelpAndExit(nil)
 	}
-	if err := f(c.windowID); err != nil {
-		log.Fatal(err)
-	}
+	return struct{}{}
 }
 
-func (c *oneShotClient) sizeArgHandler(
-	f func(wid wmutils.WindowID, size grid.Size) error,
-	args []string,
-) {
+func (c client) sizeArg(args []string) grid.Size {
 	if len(args) != 2 {
-		c.printHelpAndExit(args)
+		c.printHelpAndExit(nil)
 	}
 	var size grid.Size
 	var err error
 	if size.W, err = strconv.Atoi(args[0]); err != nil {
-		c.printHelpAndExit(args)
+		c.printHelpAndExit(nil)
 	}
 	if size.H, err = strconv.Atoi(args[1]); err != nil {
-		c.printHelpAndExit(args)
+		c.printHelpAndExit(nil)
 	}
-	if err := f(c.windowID, size); err != nil {
-		log.Fatal(err)
-	}
+	return size
 }
 
-func (c *oneShotClient) directionArgHandler(
-	f func(wid wmutils.WindowID, direction grid.Direction) error,
-	args []string,
-) {
+func (c client) directionArg(args []string) grid.Direction {
 	if len(args) != 1 {
-		c.printHelpAndExit(args)
+		c.printHelpAndExit(nil)
 	}
 	var direction grid.Direction
 	switch strings.ToLower(args[0]) {
@@ -122,37 +83,33 @@ func (c *oneShotClient) directionArgHandler(
 	case "down", "d", "south", "s":
 		direction = grid.Down
 	default:
-		c.printHelpAndExit(args)
+		c.printHelpAndExit(nil)
 	}
-	if err := f(c.windowID, direction); err != nil {
-		log.Fatal(err)
-	}
+	return direction
 }
 
-func (c *oneShotClient) handleTeleport(args []string) {
+func (c client) rectangleArg(args []string) server.Rectangle {
 	if len(args) != 4 {
-		c.printHelpAndExit(args)
+		c.printHelpAndExit(nil)
 	}
-	var tl, br grid.Position
+	var r server.Rectangle
 	var err error
-	if tl.X, err = strconv.Atoi(args[0]); err != nil {
-		c.printHelpAndExit(args)
+	if r.TopLeft.X, err = strconv.Atoi(args[0]); err != nil {
+		c.printHelpAndExit(nil)
 	}
-	if tl.Y, err = strconv.Atoi(args[1]); err != nil {
-		c.printHelpAndExit(args)
+	if r.TopLeft.Y, err = strconv.Atoi(args[1]); err != nil {
+		c.printHelpAndExit(nil)
 	}
-	if br.X, err = strconv.Atoi(args[2]); err != nil {
-		c.printHelpAndExit(args)
+	if r.BottomRight.X, err = strconv.Atoi(args[2]); err != nil {
+		c.printHelpAndExit(nil)
 	}
-	if br.Y, err = strconv.Atoi(args[3]); err != nil {
-		c.printHelpAndExit(args)
+	if r.BottomRight.Y, err = strconv.Atoi(args[3]); err != nil {
+		c.printHelpAndExit(nil)
 	}
-	if err := c.grid.Teleport(c.windowID, tl, br); err != nil {
-		log.Fatal(err)
-	}
+	return r
 }
 
-func (c *oneShotClient) printHelpAndExit(args []string) {
+func (c client) printHelpAndExit(args []string) {
 	// TODO improve this (including command specific help)
 	if len(args) == 0 {
 		fmt.Printf("Usage:\n\n\t%v command [arguments]\n\n", c.name)
