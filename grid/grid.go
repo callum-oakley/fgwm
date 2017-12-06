@@ -63,13 +63,16 @@ type Grid struct {
 	// padding around cells
 	pad wmutils.Size
 	// border around cells
-	border wmutils.Size
+	border wmutils.Pixels
 	// size of each cell, including pad and border but excluding margin
 	cell wmutils.Size
 	// the pixel locations of the cell boundaries
 	points map[Position]wmutils.Position
 	// the size of the grid in cells
 	size Size
+	// the old positions of any full screen windows
+	// TODO clean this up when windows are deleted
+	fullscreen map[wmutils.WindowID]Rectangle
 }
 
 // The sizes that define the grid layout are made up as follows (bd is border).
@@ -83,7 +86,7 @@ type Grid struct {
 //
 
 type Options struct {
-	Border    wmutils.Size
+	Border    wmutils.Pixels
 	MinMargin wmutils.Size
 	Pad       wmutils.Size
 	Size      Size
@@ -107,11 +110,12 @@ func New(opts *Options) (*Grid, error) {
 		H: (screen.H - wmutils.Pixels(opts.Size.H)*cell.H) / 2,
 	}
 	return &Grid{
-		screen: screen,
-		margin: margin,
-		border: opts.Border,
-		pad:    opts.Pad,
-		cell:   cell,
-		size:   opts.Size,
+		screen:     screen,
+		margin:     margin,
+		border:     opts.Border,
+		pad:        opts.Pad,
+		cell:       cell,
+		size:       opts.Size,
+		fullscreen: map[wmutils.WindowID]Rectangle{},
 	}, nil
 }

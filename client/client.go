@@ -16,32 +16,37 @@ type client struct {
 }
 
 func Run(args []string) {
+	c := client{args[0]}
 	conn, err := rpc.DialHTTP("tcp", "localhost:62676")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("%v: %v", c.name, err)
 	}
-	c := client{args[0]}
 	switch args[1] {
 	case "snap":
-		conn.Call("Server.Snap", c.noArgs(args[2:]), nil)
+		err = conn.Call("Server.Snap", c.noArgs(args[2:]), nil)
 	case "center":
-		conn.Call("Server.Center", c.noArgs(args[2:]), nil)
+		err = conn.Call("Server.Center", c.noArgs(args[2:]), nil)
+	case "fullscreen":
+		err = conn.Call("Server.Fullscreen", c.noArgs(args[2:]), nil)
 	case "kill":
-		conn.Call("Server.Kill", c.noArgs(args[2:]), nil)
+		err = conn.Call("Server.Kill", c.noArgs(args[2:]), nil)
 	case "move":
-		conn.Call("Server.Move", c.sizeArg(args[2:]), nil)
+		err = conn.Call("Server.Move", c.sizeArg(args[2:]), nil)
 	case "grow":
-		conn.Call("Server.Grow", c.sizeArg(args[2:]), nil)
+		err = conn.Call("Server.Grow", c.sizeArg(args[2:]), nil)
 	case "throw":
-		conn.Call("Server.Throw", c.directionArg(args[2:]), nil)
+		err = conn.Call("Server.Throw", c.directionArg(args[2:]), nil)
 	case "spread":
-		conn.Call("Server.Spread", c.directionArg(args[2:]), nil)
+		err = conn.Call("Server.Spread", c.directionArg(args[2:]), nil)
 	case "teleport":
-		conn.Call("Server.Teleport", c.rectangleArg(args[2:]), nil)
+		err = conn.Call("Server.Teleport", c.rectangleArg(args[2:]), nil)
 	case "help":
 		c.printHelpAndExit(args[2:])
 	default:
 		c.printHelpAndExit(nil)
+	}
+	if err != nil {
+		log.Fatalf("%v: %v", c.name, err)
 	}
 }
 

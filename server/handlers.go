@@ -21,6 +21,14 @@ func (s *Server) Center(struct{}, *struct{}) error {
 	return s.grid.Center(wid)
 }
 
+func (s *Server) Fullscreen(struct{}, *struct{}) error {
+	wid, err := wmutils.Focussed()
+	if err != nil {
+		return err
+	}
+	return s.grid.Fullscreen(wid)
+}
+
 func (s *Server) Kill(struct{}, *struct{}) error {
 	wid, err := wmutils.Focussed()
 	if err != nil {

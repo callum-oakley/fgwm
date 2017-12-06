@@ -24,6 +24,19 @@ func (g *Grid) Center(wid wmutils.WindowID) error {
 	})
 }
 
+func (g *Grid) Fullscreen(wid wmutils.WindowID) error {
+	if r, ok := g.fullscreen[wid]; ok {
+		return g.Teleport(wid, r)
+	}
+	r, err := g.getRectangle(wid)
+	if err != nil {
+		return err
+	}
+	g.fullscreen[wid] = r
+	wmutils.SetBorderWidth(wid, 0)
+	return wmutils.Teleport(wid, wmutils.Position{}, g.screen)
+}
+
 func (g *Grid) Move(wid wmutils.WindowID, diff Size) error {
 	r, err := g.getRectangle(wid)
 	if err != nil {
@@ -116,9 +129,13 @@ func (g *Grid) Teleport(wid wmutils.WindowID, r Rectangle) error {
 	if !g.inGrid(r) || !r.Valid() {
 		return nil
 	}
+	delete(g.fullscreen, wid)
+	wmutils.SetBorderWidth(wid, g.border)
 	return wmutils.Teleport(
 		wid,
 		g.pixelPosition(r.TopLeft).Offset(g.pad),
-		g.pixelSize(r.Size()).Add(g.pad.Add(g.border).Scale(-2)),
+		g.pixelSize(r.Size()).Add(
+			g.pad.Add(wmutils.Size{g.border, g.border}).Scale(-2),
+		),
 	)
 }

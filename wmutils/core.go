@@ -86,6 +86,10 @@ func Teleport(wid WindowID, pos Position, size Size) error {
 	).Run()
 }
 
+func SetBorderWidth(wid WindowID, width Pixels) error {
+	return exec.Command("chwb", "-s", fmt.Sprintf("%v", width), wid.String()).Run()
+}
+
 // Map (show) the window with the given ID. Wraps mapw -m.
 func Map(wid WindowID) error {
 	return exec.Command("mapw", "-m", wid.String()).Run()
