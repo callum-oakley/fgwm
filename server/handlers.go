@@ -5,10 +5,6 @@ import (
 	"github.com/hot-leaf-juice/fgwm/wmutils"
 )
 
-type Rectangle struct {
-	TopLeft, BottomRight grid.Position
-}
-
 func (s *Server) Snap(struct{}, *struct{}) error {
 	wid, err := wmutils.Focussed()
 	if err != nil {
@@ -65,10 +61,10 @@ func (s *Server) Spread(direction grid.Direction, _ *struct{}) error {
 	return s.grid.Spread(wid, direction)
 }
 
-func (s *Server) Teleport(rectangle Rectangle, _ *struct{}) error {
+func (s *Server) Teleport(rectangle grid.Rectangle, _ *struct{}) error {
 	wid, err := wmutils.Focussed()
 	if err != nil {
 		return err
 	}
-	return s.grid.Teleport(wid, rectangle.TopLeft, rectangle.BottomRight)
+	return s.grid.Teleport(wid, rectangle)
 }

@@ -2,12 +2,12 @@ package grid
 
 import "github.com/hot-leaf-juice/fgwm/wmutils"
 
-func (g *Grid) getAttributes(wid wmutils.WindowID) (Position, Position, error) {
+func (g *Grid) getRectangle(wid wmutils.WindowID) (Rectangle, error) {
 	pPos, pSize, err := wmutils.GetAttributes(wid)
 	if err != nil {
-		return Position{}, Position{}, err
+		return Rectangle{}, err
 	}
-	return g.closestPoint(pPos), g.closestPoint(pPos.Offset(pSize)), nil
+	return Rectangle{g.closestPoint(pPos), g.closestPoint(pPos.Offset(pSize))}, nil
 }
 
 func (g *Grid) closestPoint(p wmutils.Position) Position {
@@ -17,8 +17,12 @@ func (g *Grid) closestPoint(p wmutils.Position) Position {
 	}
 }
 
-func (g *Grid) inGrid(p Position) bool {
+func (g *Grid) pInGrid(p Position) bool {
 	return 0 <= p.X && p.X <= g.size.W && 0 <= p.Y && p.Y <= g.size.H
+}
+
+func (g *Grid) inGrid(r Rectangle) bool {
+	return g.pInGrid(r.TopLeft) && g.pInGrid(r.BottomRight)
 }
 
 func (g *Grid) pixelSize(size Size) wmutils.Size {

@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/hot-leaf-juice/fgwm/grid"
-	"github.com/hot-leaf-juice/fgwm/server"
 )
 
 type client struct {
@@ -88,11 +87,11 @@ func (c client) directionArg(args []string) grid.Direction {
 	return direction
 }
 
-func (c client) rectangleArg(args []string) server.Rectangle {
+func (c client) rectangleArg(args []string) grid.Rectangle {
 	if len(args) != 4 {
 		c.printHelpAndExit(nil)
 	}
-	var r server.Rectangle
+	var r grid.Rectangle
 	var err error
 	if r.TopLeft.X, err = strconv.Atoi(args[0]); err != nil {
 		c.printHelpAndExit(nil)

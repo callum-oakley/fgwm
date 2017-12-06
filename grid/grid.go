@@ -19,6 +19,10 @@ type Size struct {
 	W, H int
 }
 
+type Rectangle struct {
+	TopLeft, BottomRight Position
+}
+
 func (p Position) Offset(s Size) Position {
 	return Position{p.X + s.W, p.Y + s.H}
 }
@@ -33,6 +37,22 @@ func (a Size) Add(b Size) Size {
 
 func (a Size) Scale(k int) Size {
 	return Size{k * a.W, k * a.H}
+}
+
+func (r Rectangle) Size() Size {
+	return r.BottomRight.Diff(r.TopLeft)
+}
+
+func (r Rectangle) Offset(s Size) Rectangle {
+	return Rectangle{r.TopLeft.Offset(s), r.BottomRight.Offset(s)}
+}
+
+func (r Rectangle) Grow(s Size) Rectangle {
+	return Rectangle{r.TopLeft.Offset(s.Scale(-1)), r.BottomRight.Offset(s)}
+}
+
+func (r Rectangle) Valid() bool {
+	return r.TopLeft.X < r.BottomRight.X && r.TopLeft.Y < r.BottomRight.Y
 }
 
 type Grid struct {
