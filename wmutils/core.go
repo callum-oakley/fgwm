@@ -3,6 +3,7 @@ package wmutils
 
 import (
 	"fmt"
+	"io"
 	"os/exec"
 )
 
@@ -55,6 +56,34 @@ func fetchWID(cmd *exec.Cmd) (WindowID, error) {
 // Focussed returns the WindowID of the currently focussed window. Wraps pfw.
 func Focussed() (WindowID, error) {
 	return fetchWID(exec.Command("pfw"))
+}
+
+// List lists the IDs of the child windows of the root (excluding invisible or
+// ignored windows). Wraps lsw.
+func List() ([]WindowID, error) {
+	var wids []WindowID
+	cmd := exec.Command("lsw")
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, err
+	}
+	if err := cmd.Start(); err != nil {
+		return nil, err
+	}
+	for {
+		var wid WindowID
+		_, err := fmt.Fscanf(stdout, "%v", &wid)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+		wids = append(wids, wid)
+	}
+	if err := cmd.Wait(); err != nil {
+		return nil, err
+	}
+	return wids, nil
 }
 
 // Root gets the window ID of the root window. Wraps lsw -r.

@@ -38,6 +38,8 @@ func Run(args []string) {
 		err = conn.Call("Server.Throw", c.directionArg(args[2:]), nil)
 	case "spread":
 		err = conn.Call("Server.Spread", c.directionArg(args[2:]), nil)
+	case "focus":
+		err = conn.Call("Server.Focus", c.nextOrPrevArg(args[2:]), nil)
 	case "teleport":
 		err = conn.Call("Server.Teleport", c.rectangleArg(args[2:]), nil)
 	case "help":
@@ -90,6 +92,22 @@ func (c client) directionArg(args []string) grid.Direction {
 		c.printHelpAndExit(nil)
 	}
 	return direction
+}
+
+func (c client) nextOrPrevArg(args []string) grid.NextOrPrev {
+	if len(args) != 1 {
+		c.printHelpAndExit(nil)
+	}
+	var nextOrPrev grid.NextOrPrev
+	switch strings.ToLower(args[0]) {
+	case "next", "n":
+		nextOrPrev = grid.Next
+	case "prev", "p":
+		nextOrPrev = grid.Prev
+	default:
+		c.printHelpAndExit(nil)
+	}
+	return nextOrPrev
 }
 
 func (c client) rectangleArg(args []string) grid.Rectangle {

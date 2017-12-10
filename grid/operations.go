@@ -6,6 +6,38 @@ import (
 	"github.com/hot-leaf-juice/fgwm/wmutils"
 )
 
+func index(wids []wmutils.WindowID, wid wmutils.WindowID) (int, error) {
+	for i := 0; i < len(wids); i++ {
+		if wids[i] == wid {
+			return i, nil
+		}
+	}
+	return 0, fmt.Errorf("can't find %v in %v", wid, wids)
+}
+
+func (g *Grid) Focus(nextOrPrev NextOrPrev) error {
+	wid, err := wmutils.Focussed()
+	if err != nil {
+		return err
+	}
+	wids, err := wmutils.List()
+	if err != nil {
+		return err
+	}
+	i, err := index(wids, wid)
+	if err != nil {
+		return err
+	}
+	var di int
+	switch nextOrPrev {
+	case Next:
+		di = 1
+	case Prev:
+		di = len(wids) - 1 // so that %len(wids) never results in a negative
+	}
+	return wmutils.Focus(wids[(i+di)%len(wids)])
+}
+
 func (g *Grid) Snap(wid wmutils.WindowID) error {
 	return g.Move(wid, Size{0, 0})
 }

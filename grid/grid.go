@@ -11,6 +11,13 @@ const (
 	Down
 )
 
+type NextOrPrev int
+
+const (
+	Next NextOrPrev = iota
+	Prev
+)
+
 type Position struct {
 	X, Y int
 }

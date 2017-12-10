@@ -69,6 +69,10 @@ func (s *Server) Spread(direction grid.Direction, _ *struct{}) error {
 	return s.grid.Spread(wid, direction)
 }
 
+func (s *Server) Focus(nextOrPrev grid.NextOrPrev, _ *struct{}) error {
+	return s.grid.Focus(nextOrPrev)
+}
+
 func (s *Server) Teleport(rectangle grid.Rectangle, _ *struct{}) error {
 	wid, err := wmutils.Focussed()
 	if err != nil {
