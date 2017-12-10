@@ -1,72 +1,37 @@
 package server
 
-import (
-	"github.com/hot-leaf-juice/fgwm/grid"
-	"github.com/hot-leaf-juice/fgwm/wmutils"
-)
+import "github.com/hot-leaf-juice/fgwm/grid"
 
 func (s *Server) Snap(struct{}, *struct{}) error {
-	wid, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	return s.grid.Snap(wid)
+	return s.grid.Snap()
 }
 
 func (s *Server) Center(struct{}, *struct{}) error {
-	wid, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	return s.grid.Center(wid)
+	return s.grid.Center()
 }
 
 func (s *Server) Fullscreen(struct{}, *struct{}) error {
-	wid, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	return s.grid.Fullscreen(wid)
+	return s.grid.Fullscreen()
 }
 
 func (s *Server) Kill(struct{}, *struct{}) error {
-	wid, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	return wmutils.Kill(wid)
+	return s.grid.Kill()
 }
 
 func (s *Server) Move(diff grid.Size, _ *struct{}) error {
-	wid, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	return s.grid.Move(wid, diff)
+	return s.grid.Move(diff)
 }
 
 func (s *Server) Grow(diff grid.Size, _ *struct{}) error {
-	wid, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	return s.grid.Grow(wid, diff)
+	return s.grid.Grow(diff)
 }
 
 func (s *Server) Throw(direction grid.Direction, _ *struct{}) error {
-	wid, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	return s.grid.Throw(wid, direction)
+	return s.grid.Throw(direction)
 }
 
 func (s *Server) Spread(direction grid.Direction, _ *struct{}) error {
-	wid, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	return s.grid.Spread(wid, direction)
+	return s.grid.Spread(direction)
 }
 
 func (s *Server) Focus(nextOrPrev grid.NextOrPrev, _ *struct{}) error {
@@ -74,9 +39,5 @@ func (s *Server) Focus(nextOrPrev grid.NextOrPrev, _ *struct{}) error {
 }
 
 func (s *Server) Teleport(rectangle grid.Rectangle, _ *struct{}) error {
-	wid, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	return s.grid.Teleport(wid, rectangle)
+	return s.grid.Teleport(rectangle)
 }

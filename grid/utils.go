@@ -51,3 +51,18 @@ func index(wids []wmutils.WindowID, wid wmutils.WindowID) (int, error) {
 	}
 	return 0, fmt.Errorf("can't find %v in %v", wid, wids)
 }
+
+func (g *Grid) teleportWID(wid wmutils.WindowID, r Rectangle) error {
+	if !g.inGrid(r) || !r.Valid() {
+		return nil
+	}
+	delete(g.fullscreen, wid)
+	wmutils.SetBorderWidth(wid, g.border)
+	return wmutils.Teleport(
+		wid,
+		g.pixelPosition(r.TopLeft).Offset(g.pad),
+		g.pixelSize(r.Size()).Add(
+			g.pad.Add(wmutils.Size{g.border, g.border}).Scale(-2),
+		),
+	)
+}
