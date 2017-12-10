@@ -39,7 +39,7 @@ func Run(args []string) {
 	case "spread":
 		err = conn.Call("Server.Spread", c.directionArg(args[2:]), nil)
 	case "focus":
-		err = conn.Call("Server.Focus", c.nextOrPrevArg(args[2:]), nil)
+		err = conn.Call("Server.Focus", c.focusStrategyArg(args[2:]), nil)
 	case "teleport":
 		err = conn.Call("Server.Teleport", c.rectangleArg(args[2:]), nil)
 	case "help":
@@ -80,13 +80,13 @@ func (c client) directionArg(args []string) grid.Direction {
 	}
 	var direction grid.Direction
 	switch strings.ToLower(args[0]) {
-	case "left", "l", "west", "w":
+	case "left", "l":
 		direction = grid.Left
-	case "right", "r", "east", "e":
+	case "right", "r":
 		direction = grid.Right
-	case "up", "u", "north", "n":
+	case "up", "u":
 		direction = grid.Up
-	case "down", "d", "south", "s":
+	case "down", "d":
 		direction = grid.Down
 	default:
 		c.printHelpAndExit(nil)
@@ -94,20 +94,22 @@ func (c client) directionArg(args []string) grid.Direction {
 	return direction
 }
 
-func (c client) nextOrPrevArg(args []string) grid.NextOrPrev {
+func (c client) focusStrategyArg(args []string) grid.FocusStrategy {
 	if len(args) != 1 {
 		c.printHelpAndExit(nil)
 	}
-	var nextOrPrev grid.NextOrPrev
+	var strategy grid.FocusStrategy
 	switch strings.ToLower(args[0]) {
 	case "next", "n":
-		nextOrPrev = grid.Next
+		strategy = grid.Next
 	case "prev", "p":
-		nextOrPrev = grid.Prev
+		strategy = grid.Prev
+	case "mru", "m":
+		strategy = grid.MRU
 	default:
 		c.printHelpAndExit(nil)
 	}
-	return nextOrPrev
+	return strategy
 }
 
 func (c client) rectangleArg(args []string) grid.Rectangle {

@@ -66,3 +66,12 @@ func (g *Grid) teleportWID(wid wmutils.WindowID, r Rectangle) error {
 		),
 	)
 }
+
+func (g *Grid) focusWID(from, to wmutils.WindowID) error {
+	// TODO change border colour
+	g.mruWID = from
+	if err := wmutils.Focus(to); err != nil {
+		return err
+	}
+	return wmutils.Raise(to)
+}

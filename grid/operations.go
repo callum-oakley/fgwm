@@ -6,7 +6,7 @@ import (
 	"github.com/hot-leaf-juice/fgwm/wmutils"
 )
 
-func (g *Grid) Focus(nextOrPrev NextOrPrev) error {
+func (g *Grid) Focus(strategy FocusStrategy) error {
 	wid, err := wmutils.Focussed()
 	if err != nil {
 		return err
@@ -15,22 +15,21 @@ func (g *Grid) Focus(nextOrPrev NextOrPrev) error {
 	if err != nil {
 		return err
 	}
+	if strategy == MRU {
+		return g.focusWID(wid, g.mruWID)
+	}
 	i, err := index(wids, wid)
 	if err != nil {
 		return err
 	}
-	var di int
-	switch nextOrPrev {
+	switch strategy {
 	case Next:
-		di = 1
+		return g.focusWID(wid, wids[(i+1)%len(wids)])
 	case Prev:
-		di = len(wids) - 1 // so that %len(wids) never results in a negative
+		return g.focusWID(wid, wids[(i+len(wids)-1)%len(wids)])
+	default: // note MRU is handled above
+		return fmt.Errorf("unsupported focus strategy '%v'", strategy)
 	}
-	wid = wids[(i+di)%len(wids)]
-	if err := wmutils.Focus(wid); err != nil {
-		return err
-	}
-	return wmutils.Raise(wid)
 }
 
 func (g *Grid) Snap() error {
@@ -145,7 +144,7 @@ func (g *Grid) Throw(direction Direction) error {
 			Position{r.BottomRight.X, g.size.H},
 		})
 	default:
-		return fmt.Errorf("Unsupported direction '%v'", direction)
+		return fmt.Errorf("unsupported direction '%v'", direction)
 	}
 }
 

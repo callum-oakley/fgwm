@@ -34,8 +34,8 @@ func (s *Server) Spread(direction grid.Direction, _ *struct{}) error {
 	return s.grid.Spread(direction)
 }
 
-func (s *Server) Focus(nextOrPrev grid.NextOrPrev, _ *struct{}) error {
-	return s.grid.Focus(nextOrPrev)
+func (s *Server) Focus(strategy grid.FocusStrategy, _ *struct{}) error {
+	return s.grid.Focus(strategy)
 }
 
 func (s *Server) Teleport(rectangle grid.Rectangle, _ *struct{}) error {

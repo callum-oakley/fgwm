@@ -11,11 +11,12 @@ const (
 	Down
 )
 
-type NextOrPrev int
+type FocusStrategy int
 
 const (
-	Next NextOrPrev = iota
+	Next FocusStrategy = iota
 	Prev
+	MRU
 )
 
 type Position struct {
@@ -80,6 +81,8 @@ type Grid struct {
 	// the old positions of any full screen windows
 	// TODO clean this up when windows are deleted
 	fullscreen map[wmutils.WindowID]Rectangle
+	// the ID of the last window (other than the current one) focussed
+	mruWID wmutils.WindowID
 }
 
 // The sizes that define the grid layout are made up as follows (bd is border).
