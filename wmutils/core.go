@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"sort"
 )
 
 type WindowID uint
@@ -35,31 +36,13 @@ func (a Size) Scale(k Pixels) Size {
 	return Size{k * a.W, k * a.H}
 }
 
-func fetchWID(cmd *exec.Cmd) (WindowID, error) {
-	var wid WindowID
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return 0, err
-	}
-	if err := cmd.Start(); err != nil {
-		return 0, err
-	}
-	if _, err := fmt.Fscanf(stdout, "%v", &wid); err != nil {
-		return 0, err
-	}
-	if err := cmd.Wait(); err != nil {
-		return 0, err
-	}
-	return wid, nil
-}
-
 // Focussed returns the WindowID of the currently focussed window. Wraps pfw.
 func Focussed() (WindowID, error) {
 	return fetchWID(exec.Command("pfw"))
 }
 
 // List lists the IDs of the child windows of the root (excluding invisible or
-// ignored windows). Wraps lsw.
+// ignored windows) sorted by ID. Wraps lsw.
 func List() ([]WindowID, error) {
 	var wids []WindowID
 	cmd := exec.Command("lsw")
@@ -83,6 +66,7 @@ func List() ([]WindowID, error) {
 	if err := cmd.Wait(); err != nil {
 		return nil, err
 	}
+	sort.Slice(wids, func(i, j int) bool { return wids[i] < wids[j] })
 	return wids, nil
 }
 
@@ -115,8 +99,19 @@ func Teleport(wid WindowID, pos Position, size Size) error {
 	).Run()
 }
 
+// Raises the window with the given ID to the top of the stacking order. Wraps
+// chwso.
+func Raise(wid WindowID) error {
+	return exec.Command("chwso", "-r", wid.String()).Run()
+}
+
 func SetBorderWidth(wid WindowID, width Pixels) error {
-	return exec.Command("chwb", "-s", fmt.Sprintf("%v", width), wid.String()).Run()
+	return exec.Command(
+		"chwb",
+		"-s",
+		fmt.Sprintf("%v", width),
+		wid.String(),
+	).Run()
 }
 
 // Map (show) the window with the given ID. Wraps mapw -m.
@@ -132,19 +127,6 @@ func Unmap(wid WindowID) error {
 // Toggle the visibility of the window with the given ID. Wraps mapw -t.
 func Toggle(wid WindowID) error {
 	return exec.Command("mapw", "-t", wid.String()).Run()
-}
-
-func exitStatusOk(cmd *exec.Cmd) (bool, error) {
-	err := cmd.Run()
-	if err != nil {
-		switch err.(type) {
-		case *exec.ExitError:
-			return false, nil
-		default:
-			return false, err
-		}
-	}
-	return true, nil
 }
 
 // IsIgnored returns true if and only if the window with the given ID has the
@@ -186,4 +168,35 @@ func GetAttributes(wid WindowID) (Position, Size, error) {
 		return pos, size, err
 	}
 	return pos, size, nil
+}
+
+func exitStatusOk(cmd *exec.Cmd) (bool, error) {
+	err := cmd.Run()
+	if err != nil {
+		switch err.(type) {
+		case *exec.ExitError:
+			return false, nil
+		default:
+			return false, err
+		}
+	}
+	return true, nil
+}
+
+func fetchWID(cmd *exec.Cmd) (WindowID, error) {
+	var wid WindowID
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return 0, err
+	}
+	if err := cmd.Start(); err != nil {
+		return 0, err
+	}
+	if _, err := fmt.Fscanf(stdout, "%v", &wid); err != nil {
+		return 0, err
+	}
+	if err := cmd.Wait(); err != nil {
+		return 0, err
+	}
+	return wid, nil
 }
