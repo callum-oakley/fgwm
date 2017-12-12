@@ -1,6 +1,11 @@
 package grid
 
-import "github.com/hot-leaf-juice/fgwm/wmutils"
+import (
+	"time"
+
+	"github.com/hot-leaf-juice/fgwm/focus"
+	"github.com/hot-leaf-juice/fgwm/wmutils"
+)
 
 type Direction int
 
@@ -16,7 +21,6 @@ type FocusStrategy int
 const (
 	Next FocusStrategy = iota
 	Prev
-	MRU
 )
 
 type Position struct {
@@ -82,7 +86,7 @@ type Grid struct {
 	// TODO clean this up when windows are deleted
 	fullscreen map[wmutils.WindowID]Rectangle
 	// the ID of the last window (other than the current one) focussed
-	mruWID wmutils.WindowID
+	focusMgr focus.Manager
 }
 
 // The sizes that define the grid layout are made up as follows (bd is border).
@@ -96,10 +100,11 @@ type Grid struct {
 //
 
 type Options struct {
-	Border    wmutils.Pixels
-	MinMargin wmutils.Size
-	Pad       wmutils.Size
-	Size      Size
+	Border       wmutils.Pixels
+	MinMargin    wmutils.Size
+	Pad          wmutils.Size
+	Size         Size
+	FocusTimeout time.Duration
 }
 
 func New(opts *Options) (*Grid, error) {
@@ -127,5 +132,6 @@ func New(opts *Options) (*Grid, error) {
 		cell:       cell,
 		size:       opts.Size,
 		fullscreen: map[wmutils.WindowID]Rectangle{},
+		focusMgr:   focus.NewManager(opts.FocusTimeout),
 	}, nil
 }

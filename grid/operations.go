@@ -7,27 +7,12 @@ import (
 )
 
 func (g *Grid) Focus(strategy FocusStrategy) error {
-	wid, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	wids, err := wmutils.List()
-	if err != nil {
-		return err
-	}
-	if strategy == MRU {
-		return g.focusWID(wid, g.mruWID)
-	}
-	i, err := index(wids, wid)
-	if err != nil {
-		return err
-	}
 	switch strategy {
 	case Next:
-		return g.focusWID(wid, wids[(i+1)%len(wids)])
+		return g.focusMgr.FocusNext()
 	case Prev:
-		return g.focusWID(wid, wids[(i+len(wids)-1)%len(wids)])
-	default: // note MRU is handled above
+		return g.focusMgr.FocusPrev()
+	default:
 		return fmt.Errorf("unsupported focus strategy '%v'", strategy)
 	}
 }

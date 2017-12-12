@@ -104,8 +104,6 @@ func (c client) focusStrategyArg(args []string) grid.FocusStrategy {
 		strategy = grid.Next
 	case "prev", "p":
 		strategy = grid.Prev
-	case "mru", "m":
-		strategy = grid.MRU
 	default:
 		c.printHelpAndExit(nil)
 	}

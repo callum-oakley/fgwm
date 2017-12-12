@@ -11,7 +11,10 @@ func (g *Grid) getRectangle(wid wmutils.WindowID) (Rectangle, error) {
 	if err != nil {
 		return Rectangle{}, err
 	}
-	return Rectangle{g.closestPoint(pPos), g.closestPoint(pPos.Offset(pSize))}, nil
+	return Rectangle{
+		g.closestPoint(pPos),
+		g.closestPoint(pPos.Offset(pSize)),
+	}, nil
 }
 
 func (g *Grid) closestPoint(p wmutils.Position) Position {
@@ -65,13 +68,4 @@ func (g *Grid) teleportWID(wid wmutils.WindowID, r Rectangle) error {
 			g.pad.Add(wmutils.Size{g.border, g.border}).Scale(-2),
 		),
 	)
-}
-
-func (g *Grid) focusWID(from, to wmutils.WindowID) error {
-	// TODO change border colour
-	g.mruWID = from
-	if err := wmutils.Focus(to); err != nil {
-		return err
-	}
-	return wmutils.Raise(to)
 }

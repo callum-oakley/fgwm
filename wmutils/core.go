@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
-	"sort"
 )
 
 type WindowID uint
@@ -41,10 +40,10 @@ func Focussed() (WindowID, error) {
 	return fetchWID(exec.Command("pfw"))
 }
 
-// List lists the IDs of the child windows of the root (excluding invisible or
-// ignored windows) sorted by ID. Wraps lsw.
-func List() ([]WindowID, error) {
-	var wids []WindowID
+// List returns the IDs of the child windows of the root (excluding invisible
+// or ignored windows). Wraps lsw.
+func List() (map[WindowID]bool, error) {
+	wids := map[WindowID]bool{}
 	cmd := exec.Command("lsw")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -61,12 +60,11 @@ func List() ([]WindowID, error) {
 		} else if err != nil {
 			return nil, err
 		}
-		wids = append(wids, wid)
+		wids[wid] = true
 	}
 	if err := cmd.Wait(); err != nil {
 		return nil, err
 	}
-	sort.Slice(wids, func(i, j int) bool { return wids[i] < wids[j] })
 	return wids, nil
 }
 
