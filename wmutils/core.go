@@ -13,6 +13,12 @@ func (wid WindowID) String() string {
 	return fmt.Sprintf("0x%08x", uint(wid))
 }
 
+type Colour uint
+
+func (colour Colour) String() string {
+	return fmt.Sprintf("0x%06x", uint(colour))
+}
+
 type Pixels int
 
 type Position struct {
@@ -110,6 +116,10 @@ func SetBorderWidth(wid WindowID, width Pixels) error {
 		fmt.Sprintf("%v", width),
 		wid.String(),
 	).Run()
+}
+
+func SetBorderColour(wid WindowID, colour Colour) error {
+	return exec.Command("chwb", "-c", colour.String(), wid.String()).Run()
 }
 
 // Map (show) the window with the given ID. Wraps mapw -m.

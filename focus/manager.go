@@ -1,36 +1,47 @@
 package focus
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/hot-leaf-juice/fgwm/wmutils"
 )
 
 type Manager interface {
-	FocusWID(wid wmutils.WindowID) error
+	Register(wid wmutils.WindowID) error
+	Unregister(wid wmutils.WindowID)
+	Focus(wid wmutils.WindowID) error
+	Unfocus(wid wmutils.WindowID) error
 	FocusNext() error
 	FocusPrev() error
 }
 
 type manager struct {
-	// TODO mutex
+	// TODO mutex?
 	// TODO clean this up on window deletion
-	wids    []wmutils.WindowID // The window stack, in mru order
-	i       int                // The current location in the window stack
-	timer   *time.Timer
-	timeout time.Duration
+	wids                             []wmutils.WindowID // The window stack, in mru order
+	timer                            *time.Timer
+	timeout                          time.Duration
+	focussedColour, unfocussedColour wmutils.Colour
 }
 
-func NewManager(timeout time.Duration) Manager {
-	m := manager{timeout: timeout}
+func NewManager(
+	timeout time.Duration,
+	focussedColour, unfocussedColour wmutils.Colour,
+) Manager {
+	m := manager{
+		timeout:          timeout,
+		focussedColour:   focussedColour,
+		unfocussedColour: unfocussedColour,
+	}
 	m.timer = time.AfterFunc(m.timeout, m.update)
 	// TODO remove ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// We shouldn't need to do this once we are focussing windows on creation,
 	// this is a hack so that we can test the behaviour alongside windowchef...
-	wids, _ := wmutils.List()
-	for wid := range wids {
-		m.wids = append(m.wids, wid)
-	}
+	// wids, _ := wmutils.List()
+	// for wid := range wids {
+	// 	m.wids = append(m.wids, wid)
+	// }
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	return &m
 }
@@ -39,35 +50,81 @@ func (m *manager) update() {
 	if len(m.wids) == 0 {
 		return
 	}
-	updated := []wmutils.WindowID{m.wids[m.i]}
-	for i, wid := range m.wids {
-		if i != m.i {
-			updated = append(updated, wid)
-		}
+	wid, err := wmutils.Focussed()
+	if err != nil {
+		return
 	}
-	m.wids = updated
-	m.i = 0
+	i := index(wid, m.wids)
+	if i < 0 {
+		return
+	}
+	for j := i; j > 0; j-- {
+		m.wids[j] = m.wids[j-1]
+	}
+	m.wids[0] = wid
 }
 
-func (m *manager) focus() error {
-	// TODO border colour
+func (m *manager) Register(wid wmutils.WindowID) error {
+	if index(wid, m.wids) < 0 {
+		m.wids = append([]wmutils.WindowID{wid}, m.wids...)
+		return m.Focus(wid)
+	}
+	return nil
+}
+
+func (m *manager) Unregister(wid wmutils.WindowID) {
+	if i := index(wid, m.wids); i > 0 {
+		m.wids = append(m.wids[:i], m.wids[i+1:]...)
+	}
+}
+
+func (m *manager) Focus(wid wmutils.WindowID) error {
 	m.timer.Stop()
-	defer m.timer.Reset(m.timeout)
-	wid := m.wids[m.i]
+	w, err := wmutils.Focussed()
+	if err != nil {
+		return err
+	}
+	if err := wmutils.SetBorderColour(w, m.unfocussedColour); err != nil {
+		return err
+	}
 	if err := wmutils.Focus(wid); err != nil {
 		return err
 	}
-	return wmutils.Raise(wid)
+	if err := wmutils.Raise(wid); err != nil {
+		return err
+	}
+	if err := wmutils.SetBorderColour(wid, m.focussedColour); err != nil {
+		return err
+	}
+	m.timer.Reset(m.timeout)
+	return nil
 }
 
-func (m *manager) FocusWID(wid wmutils.WindowID) error {
-	i := index(wid, m.wids)
-	if i < 0 {
-		m.wids = append(m.wids, wid)
-		m.i = len(m.wids) - 1
+func (m *manager) Unfocus(wid wmutils.WindowID) error {
+	w, err := wmutils.Focussed()
+	if err != nil {
+		return err
 	}
-	m.i = i
-	return m.focus()
+	if w == wid {
+		return m.focusTop()
+	}
+	return nil
+}
+
+func (m *manager) focusTop() error {
+	if len(m.wids) == 0 {
+		return nil
+	}
+	visible, err := wmutils.List()
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(m.wids); i++ {
+		if visible[m.wids[i]] {
+			return m.Focus(m.wids[i])
+		}
+	}
+	return nil
 }
 
 func (m *manager) focusFunc(f func(int) int) error {
@@ -78,13 +135,21 @@ func (m *manager) focusFunc(f func(int) int) error {
 	if err != nil {
 		return err
 	}
-	for j := 0; j == 0 || !visible[m.wids[m.i]]; j++ {
-		m.i = f(m.i)
+	wid, err := wmutils.Focussed()
+	if err != nil {
+		return err
+	}
+	i := index(wid, m.wids)
+	if i < 0 {
+		return fmt.Errorf("can't find window with id %v", wid)
+	}
+	for j := 0; j == 0 || !visible[m.wids[i]]; j++ {
+		i = f(i)
 		if j == len(m.wids) {
 			return nil
 		}
 	}
-	return m.focus()
+	return m.Focus(m.wids[i])
 }
 
 func (m *manager) FocusNext() error {

@@ -1,6 +1,7 @@
 package grid
 
 import (
+	"errors"
 	"time"
 
 	"github.com/hot-leaf-juice/fgwm/focus"
@@ -100,11 +101,11 @@ type Grid struct {
 //
 
 type Options struct {
-	Border       wmutils.Pixels
-	MinMargin    wmutils.Size
-	Pad          wmutils.Size
-	Size         Size
-	FocusTimeout time.Duration
+	Border                           wmutils.Pixels
+	MinMargin, Pad                   wmutils.Size
+	Size                             Size
+	FocusTimeout                     time.Duration
+	FocussedColour, UnfocussedColour wmutils.Colour
 }
 
 func New(opts *Options) (*Grid, error) {
@@ -132,6 +133,36 @@ func New(opts *Options) (*Grid, error) {
 		cell:       cell,
 		size:       opts.Size,
 		fullscreen: map[wmutils.WindowID]Rectangle{},
-		focusMgr:   focus.NewManager(opts.FocusTimeout),
+		focusMgr: focus.NewManager(
+			opts.FocusTimeout,
+			opts.FocussedColour,
+			opts.UnfocussedColour,
+		),
 	}, nil
+}
+
+func (g *Grid) WatchWindowEvents() error {
+	for ev := range wmutils.WatchEvents() {
+		switch ev.Type {
+		case wmutils.CreateNotifyEvent:
+			isIgnored, err := wmutils.IsIgnored(ev.WID)
+			if err != nil {
+				return err
+			}
+			if !isIgnored {
+				g.centerWID(ev.WID)
+			}
+		case wmutils.DestroyNotifyEvent:
+			g.focusMgr.Unregister(ev.WID)
+		case wmutils.UnmapNotifyEvent:
+			if err := g.focusMgr.Unfocus(ev.WID); err != nil {
+				return err
+			}
+		case wmutils.MapNotifyEvent:
+			if err := g.focusMgr.Register(ev.WID); err != nil {
+				return err
+			}
+		}
+	}
+	return errors.New("Window event channel closed!")
 }

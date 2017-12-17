@@ -26,6 +26,10 @@ func (g *Grid) Center() error {
 	if err != nil {
 		return err
 	}
+	return g.centerWID(wid)
+}
+
+func (g *Grid) centerWID(wid wmutils.WindowID) error {
 	center := Position{g.size.W / 2, g.size.H / 2}
 	r, err := g.getRectangle(wid)
 	if err != nil {

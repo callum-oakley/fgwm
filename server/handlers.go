@@ -1,43 +1,86 @@
 package server
 
-import "github.com/hot-leaf-juice/fgwm/grid"
+import (
+	"github.com/hot-leaf-juice/fgwm/grid"
+	"log"
+)
 
 func (s *Server) Snap(struct{}, *struct{}) error {
-	return s.grid.Snap()
+	err := s.grid.Snap()
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }
 
 func (s *Server) Center(struct{}, *struct{}) error {
-	return s.grid.Center()
+	err := s.grid.Center()
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }
 
 func (s *Server) Fullscreen(struct{}, *struct{}) error {
-	return s.grid.Fullscreen()
+	err := s.grid.Fullscreen()
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }
 
 func (s *Server) Kill(struct{}, *struct{}) error {
-	return s.grid.Kill()
+	err := s.grid.Kill()
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }
 
 func (s *Server) Move(diff grid.Size, _ *struct{}) error {
-	return s.grid.Move(diff)
+	err := s.grid.Move(diff)
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }
 
 func (s *Server) Grow(diff grid.Size, _ *struct{}) error {
-	return s.grid.Grow(diff)
+	err := s.grid.Grow(diff)
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }
 
 func (s *Server) Throw(direction grid.Direction, _ *struct{}) error {
-	return s.grid.Throw(direction)
+	err := s.grid.Throw(direction)
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }
 
 func (s *Server) Spread(direction grid.Direction, _ *struct{}) error {
-	return s.grid.Spread(direction)
+	err := s.grid.Spread(direction)
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }
 
 func (s *Server) Focus(strategy grid.FocusStrategy, _ *struct{}) error {
-	return s.grid.Focus(strategy)
+	err := s.grid.Focus(strategy)
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }
 
 func (s *Server) Teleport(rectangle grid.Rectangle, _ *struct{}) error {
-	return s.grid.Teleport(rectangle)
+	err := s.grid.Teleport(rectangle)
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }

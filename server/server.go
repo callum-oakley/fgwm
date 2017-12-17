@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"net/rpc"
@@ -24,6 +25,9 @@ func Run(config *Config) error {
 	if err != nil {
 		return err
 	}
+	go func() {
+		log.Fatal(g.WatchWindowEvents())
+	}()
 	s := &Server{config.Name, g}
 	rpc.Register(s)
 	rpc.HandleHTTP()
