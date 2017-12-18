@@ -84,7 +84,6 @@ type Grid struct {
 	// the size of the grid in cells
 	size Size
 	// the old positions of any full screen windows
-	// TODO clean this up when windows are deleted
 	fullscreen map[wmutils.WindowID]Rectangle
 	// the ID of the last window (other than the current one) focussed
 	focusMgr focus.Manager
@@ -157,6 +156,7 @@ func (g *Grid) WatchWindowEvents() error {
 			}
 		case wmutils.DestroyNotifyEvent:
 			g.focusMgr.Unregister(ev.WID)
+			delete(g.fullscreen, ev.WID)
 		case wmutils.UnmapNotifyEvent:
 			if err := g.focusMgr.Unfocus(ev.WID); err != nil {
 				return err
