@@ -35,14 +35,6 @@ func NewManager(
 		unfocussedColour: unfocussedColour,
 	}
 	m.timer = time.AfterFunc(m.timeout, m.update)
-	// TODO remove ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	// We shouldn't need to do this once we are focussing windows on creation,
-	// this is a hack so that we can test the behaviour alongside windowchef...
-	// wids, _ := wmutils.List()
-	// for wid := range wids {
-	// 	m.wids = append(m.wids, wid)
-	// }
-	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	return &m
 }
 
@@ -73,19 +65,17 @@ func (m *manager) Register(wid wmutils.WindowID) error {
 }
 
 func (m *manager) Unregister(wid wmutils.WindowID) {
-	if i := index(wid, m.wids); i > 0 {
+	if i := index(wid, m.wids); i >= 0 {
 		m.wids = append(m.wids[:i], m.wids[i+1:]...)
 	}
 }
 
 func (m *manager) Focus(wid wmutils.WindowID) error {
 	m.timer.Stop()
-	w, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	if err := wmutils.SetBorderColour(w, m.unfocussedColour); err != nil {
-		return err
+	if w, err := wmutils.Focussed(); err == nil {
+		if err := wmutils.SetBorderColour(w, m.unfocussedColour); err != nil {
+			return err
+		}
 	}
 	if err := wmutils.Focus(wid); err != nil {
 		return err
@@ -102,10 +92,7 @@ func (m *manager) Focus(wid wmutils.WindowID) error {
 
 func (m *manager) Unfocus(wid wmutils.WindowID) error {
 	w, err := wmutils.Focussed()
-	if err != nil {
-		return err
-	}
-	if w == wid {
+	if err != nil || w == wid {
 		return m.focusTop()
 	}
 	return nil
