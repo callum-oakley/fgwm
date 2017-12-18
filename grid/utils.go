@@ -9,7 +9,11 @@ import (
 func (g *Grid) getRectangle(wid wmutils.WindowID) (Rectangle, error) {
 	pPos, pSize, err := wmutils.GetAttributes(wid)
 	if err != nil {
-		return Rectangle{}, err
+		return Rectangle{}, fmt.Errorf(
+			"error getting rectangle for wid %v: %v",
+			wid,
+			err,
+		)
 	}
 	return Rectangle{
 		g.closestPoint(pPos),
@@ -55,12 +59,26 @@ func index(wids []wmutils.WindowID, wid wmutils.WindowID) (int, error) {
 	return 0, fmt.Errorf("can't find %v in %v", wid, wids)
 }
 
+func (g *Grid) centerWID(wid wmutils.WindowID) error {
+	center := Position{g.size.W / 2, g.size.H / 2}
+	r, err := g.getRectangle(wid)
+	if err != nil {
+		return nil
+	}
+	size := r.Size()
+	offset := Size{size.W / 2, size.H / 2}
+	return g.teleportWID(wid, Rectangle{
+		center.Offset(offset.Scale(-1)),
+		center.Offset(offset),
+	})
+}
+
 func (g *Grid) teleportWID(wid wmutils.WindowID, r Rectangle) error {
+	wmutils.SetBorderWidth(wid, g.border)
+	delete(g.fullscreen, wid)
 	if !g.inGrid(r) || !r.Valid() {
 		return nil
 	}
-	delete(g.fullscreen, wid)
-	wmutils.SetBorderWidth(wid, g.border)
 	return wmutils.Teleport(
 		wid,
 		g.pixelPosition(r.TopLeft).Offset(g.pad),

@@ -125,6 +125,14 @@ func New(opts *Options) (*Grid, error) {
 		W: (screen.W - wmutils.Pixels(opts.Size.W)*cell.W) / 2,
 		H: (screen.H - wmutils.Pixels(opts.Size.H)*cell.H) / 2,
 	}
+	focusMgr, err := focus.NewManager(
+		opts.FocusTimeout,
+		opts.FocussedColour,
+		opts.UnfocussedColour,
+	)
+	if err != nil {
+		return nil, err
+	}
 	return &Grid{
 		screen:     screen,
 		margin:     margin,
@@ -133,11 +141,7 @@ func New(opts *Options) (*Grid, error) {
 		cell:       cell,
 		size:       opts.Size,
 		fullscreen: map[wmutils.WindowID]Rectangle{},
-		focusMgr: focus.NewManager(
-			opts.FocusTimeout,
-			opts.FocussedColour,
-			opts.UnfocussedColour,
-		),
+		focusMgr:   focusMgr,
 	}, nil
 }
 
@@ -145,12 +149,11 @@ func (g *Grid) WatchWindowEvents() error {
 	for ev := range wmutils.WatchEvents() {
 		switch ev.Type {
 		case wmutils.CreateNotifyEvent:
-			isIgnored, err := wmutils.IsIgnored(ev.WID)
-			if err != nil {
+			// Wait for a tick so that the window's self imposed size has a
+			// chance to settle
+			time.Sleep(100 * time.Millisecond)
+			if err := g.centerWID(ev.WID); err != nil {
 				return err
-			}
-			if !isIgnored {
-				g.centerWID(ev.WID)
 			}
 		case wmutils.DestroyNotifyEvent:
 			g.focusMgr.Unregister(ev.WID)

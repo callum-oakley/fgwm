@@ -22,29 +22,15 @@ func (g *Grid) Snap() error {
 }
 
 func (g *Grid) Center() error {
-	wid, err := wmutils.Focussed()
+	wid, err := g.focusMgr.Focussed()
 	if err != nil {
 		return err
 	}
 	return g.centerWID(wid)
 }
 
-func (g *Grid) centerWID(wid wmutils.WindowID) error {
-	center := Position{g.size.W / 2, g.size.H / 2}
-	r, err := g.getRectangle(wid)
-	if err != nil {
-		return err
-	}
-	size := r.Size()
-	offset := Size{size.W / 2, size.H / 2}
-	return g.teleportWID(wid, Rectangle{
-		center.Offset(offset.Scale(-1)),
-		center.Offset(offset),
-	})
-}
-
 func (g *Grid) Fullscreen() error {
-	wid, err := wmutils.Focussed()
+	wid, err := g.focusMgr.Focussed()
 	if err != nil {
 		return err
 	}
@@ -61,7 +47,7 @@ func (g *Grid) Fullscreen() error {
 }
 
 func (g *Grid) Kill() error {
-	wid, err := wmutils.Focussed()
+	wid, err := g.focusMgr.Focussed()
 	if err != nil {
 		return err
 	}
@@ -69,7 +55,7 @@ func (g *Grid) Kill() error {
 }
 
 func (g *Grid) Move(diff Size) error {
-	wid, err := wmutils.Focussed()
+	wid, err := g.focusMgr.Focussed()
 	if err != nil {
 		return err
 	}
@@ -81,7 +67,7 @@ func (g *Grid) Move(diff Size) error {
 }
 
 func (g *Grid) Grow(diff Size) error {
-	wid, err := wmutils.Focussed()
+	wid, err := g.focusMgr.Focussed()
 	if err != nil {
 		return err
 	}
@@ -102,7 +88,7 @@ func (g *Grid) Grow(diff Size) error {
 }
 
 func (g *Grid) Throw(direction Direction) error {
-	wid, err := wmutils.Focussed()
+	wid, err := g.focusMgr.Focussed()
 	if err != nil {
 		return err
 	}
@@ -138,7 +124,7 @@ func (g *Grid) Throw(direction Direction) error {
 }
 
 func (g *Grid) Spread(direction Direction) error {
-	wid, err := wmutils.Focussed()
+	wid, err := g.focusMgr.Focussed()
 	if err != nil {
 		return err
 	}
@@ -173,7 +159,7 @@ func (g *Grid) Spread(direction Direction) error {
 }
 
 func (g *Grid) Teleport(r Rectangle) error {
-	wid, err := wmutils.Focussed()
+	wid, err := g.focusMgr.Focussed()
 	if err != nil {
 		return err
 	}
