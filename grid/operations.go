@@ -17,6 +17,19 @@ func (g *Grid) Focus(strategy FocusStrategy) error {
 	}
 }
 
+func (g *Grid) ViewInclude(n int) error {
+	wid, err := g.focus.Get()
+	if err != nil {
+		return err
+	}
+	g.view.Include(wid, n)
+	return nil
+}
+
+func (g *Grid) ViewSet(n int) error {
+	return g.view.Set(n)
+}
+
 func (g *Grid) Snap() error {
 	return g.Move(Size{0, 0})
 }

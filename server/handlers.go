@@ -84,3 +84,19 @@ func (s *Server) Teleport(rectangle grid.Rectangle, _ *struct{}) error {
 	}
 	return err
 }
+
+func (s *Server) ViewInclude(n int, _ *struct{}) error {
+	err := s.grid.ViewInclude(n)
+	if err != nil {
+		log.Print(err)
+	}
+	return err
+}
+
+func (s *Server) ViewSet(n int, _ *struct{}) error {
+	err := s.grid.ViewSet(n)
+	if err != nil {
+		log.Print(err)
+	}
+	return err
+}

@@ -40,6 +40,10 @@ func Run(args []string) {
 		err = conn.Call("Server.Spread", c.directionArg(args[2:]), nil)
 	case "focus":
 		err = conn.Call("Server.Focus", c.focusStrategyArg(args[2:]), nil)
+	case "view-include":
+		err = conn.Call("Server.ViewInclude", c.intArg(args[2:]), nil)
+	case "view-set":
+		err = conn.Call("Server.ViewSet", c.intArg(args[2:]), nil)
 	case "teleport":
 		err = conn.Call("Server.Teleport", c.rectangleArg(args[2:]), nil)
 	case "help":
@@ -57,6 +61,17 @@ func (c client) noArgs(args []string) struct{} {
 		c.printHelpAndExit(nil)
 	}
 	return struct{}{}
+}
+
+func (c client) intArg(args []string) int {
+	if len(args) != 1 {
+		c.printHelpAndExit(nil)
+	}
+	n, err := strconv.Atoi(args[0])
+	if err != nil {
+		c.printHelpAndExit(nil)
+	}
+	return n
 }
 
 func (c client) sizeArg(args []string) grid.Size {

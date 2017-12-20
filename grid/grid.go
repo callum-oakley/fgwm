@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hot-leaf-juice/fgwm/focus"
+	"github.com/hot-leaf-juice/fgwm/view"
 	"github.com/hot-leaf-juice/fgwm/wmutils"
 )
 
@@ -84,9 +85,10 @@ type Grid struct {
 	// the size of the grid in cells
 	size Size
 	// the old positions of any full screen windows
+	// TODO package fullscreen up like focus and view
 	fullscreen map[wmutils.WindowID]Rectangle
-	// the ID of the last window (other than the current one) focussed
-	focus focus.Focus
+	focus      focus.Focus
+	view       view.View
 }
 
 // The sizes that define the grid layout are made up as follows (bd is border).
@@ -155,8 +157,9 @@ func (g *Grid) WatchWindowEvents() error {
 				return err
 			}
 		case wmutils.DestroyNotifyEvent:
-			g.focus.Unregister(ev.WID)
 			delete(g.fullscreen, ev.WID)
+			g.focus.Unregister(ev.WID)
+			g.view.Unregister(ev.WID)
 		case wmutils.UnmapNotifyEvent:
 			if err := g.focus.Unset(ev.WID); err != nil {
 				return err
@@ -165,6 +168,7 @@ func (g *Grid) WatchWindowEvents() error {
 			if err := g.focus.Register(ev.WID); err != nil {
 				return err
 			}
+			g.view.Register(ev.WID)
 		}
 	}
 	return errors.New("Window event channel closed!")
