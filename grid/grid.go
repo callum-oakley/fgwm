@@ -86,7 +86,7 @@ type Grid struct {
 	// the old positions of any full screen windows
 	fullscreen map[wmutils.WindowID]Rectangle
 	// the ID of the last window (other than the current one) focussed
-	focusMgr focus.Manager
+	focus focus.Focus
 }
 
 // The sizes that define the grid layout are made up as follows (bd is border).
@@ -124,7 +124,7 @@ func New(opts *Options) (*Grid, error) {
 		W: (screen.W - wmutils.Pixels(opts.Size.W)*cell.W) / 2,
 		H: (screen.H - wmutils.Pixels(opts.Size.H)*cell.H) / 2,
 	}
-	focusMgr, err := focus.NewManager(
+	focus, err := focus.New(
 		opts.FocusTimeout,
 		opts.FocussedColour,
 		opts.UnfocussedColour,
@@ -140,7 +140,7 @@ func New(opts *Options) (*Grid, error) {
 		cell:       cell,
 		size:       opts.Size,
 		fullscreen: map[wmutils.WindowID]Rectangle{},
-		focusMgr:   focusMgr,
+		focus:      focus,
 	}, nil
 }
 
@@ -155,14 +155,14 @@ func (g *Grid) WatchWindowEvents() error {
 				return err
 			}
 		case wmutils.DestroyNotifyEvent:
-			g.focusMgr.Unregister(ev.WID)
+			g.focus.Unregister(ev.WID)
 			delete(g.fullscreen, ev.WID)
 		case wmutils.UnmapNotifyEvent:
-			if err := g.focusMgr.Unfocus(ev.WID); err != nil {
+			if err := g.focus.Unset(ev.WID); err != nil {
 				return err
 			}
 		case wmutils.MapNotifyEvent:
-			if err := g.focusMgr.Register(ev.WID); err != nil {
+			if err := g.focus.Register(ev.WID); err != nil {
 				return err
 			}
 		}

@@ -9,9 +9,9 @@ import (
 func (g *Grid) Focus(strategy FocusStrategy) error {
 	switch strategy {
 	case Next:
-		return g.focusMgr.FocusNext()
+		return g.focus.Next()
 	case Prev:
-		return g.focusMgr.FocusPrev()
+		return g.focus.Prev()
 	default:
 		return fmt.Errorf("unsupported focus strategy '%v'", strategy)
 	}
@@ -22,7 +22,7 @@ func (g *Grid) Snap() error {
 }
 
 func (g *Grid) Center() error {
-	wid, err := g.focusMgr.Focussed()
+	wid, err := g.focus.Get()
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (g *Grid) Center() error {
 }
 
 func (g *Grid) Fullscreen() error {
-	wid, err := g.focusMgr.Focussed()
+	wid, err := g.focus.Get()
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (g *Grid) Fullscreen() error {
 }
 
 func (g *Grid) Kill() error {
-	wid, err := g.focusMgr.Focussed()
+	wid, err := g.focus.Get()
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (g *Grid) Kill() error {
 }
 
 func (g *Grid) Move(diff Size) error {
-	wid, err := g.focusMgr.Focussed()
+	wid, err := g.focus.Get()
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (g *Grid) Move(diff Size) error {
 }
 
 func (g *Grid) Grow(diff Size) error {
-	wid, err := g.focusMgr.Focussed()
+	wid, err := g.focus.Get()
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (g *Grid) Grow(diff Size) error {
 }
 
 func (g *Grid) Throw(direction Direction) error {
-	wid, err := g.focusMgr.Focussed()
+	wid, err := g.focus.Get()
 	if err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (g *Grid) Throw(direction Direction) error {
 }
 
 func (g *Grid) Spread(direction Direction) error {
-	wid, err := g.focusMgr.Focussed()
+	wid, err := g.focus.Get()
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func (g *Grid) Spread(direction Direction) error {
 }
 
 func (g *Grid) Teleport(r Rectangle) error {
-	wid, err := g.focusMgr.Focussed()
+	wid, err := g.focus.Get()
 	if err != nil {
 		return err
 	}
