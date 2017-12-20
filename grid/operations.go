@@ -67,6 +67,10 @@ func (g *Grid) Kill() error {
 	if err != nil {
 		return err
 	}
+	g.view.Unregister(wid)
+	if g.view.IsRegistered(wid) {
+		return nil
+	}
 	return wmutils.Kill(wid)
 }
 

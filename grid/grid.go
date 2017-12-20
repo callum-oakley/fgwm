@@ -167,7 +167,7 @@ func (g *Grid) WatchWindowEvents() error {
 			if err := g.focus.Unregister(ev.WID); err != nil {
 				return err
 			}
-			g.view.Unregister(ev.WID)
+			g.view.UnregisterAll(ev.WID)
 		case wmutils.UnmapNotifyEvent:
 			if err := g.focus.Unset(ev.WID); err != nil {
 				return err

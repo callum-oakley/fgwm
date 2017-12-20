@@ -5,6 +5,8 @@ import "github.com/hot-leaf-juice/fgwm/wmutils"
 type View interface {
 	Register(wid wmutils.WindowID)
 	Unregister(wid wmutils.WindowID)
+	UnregisterAll(wid wmutils.WindowID)
+	IsRegistered(wid wmutils.WindowID) bool
 	Include(wid wmutils.WindowID, n int) // Include wid in view n
 	Set(n int) error                     // Set the view to n
 }
@@ -36,9 +38,22 @@ func (v *view) Register(wid wmutils.WindowID) {
 }
 
 func (v *view) Unregister(wid wmutils.WindowID) {
+	delete(v.views[v.current], wid)
+}
+
+func (v *view) UnregisterAll(wid wmutils.WindowID) {
 	for _, wids := range v.views {
 		delete(wids, wid)
 	}
+}
+
+func (v *view) IsRegistered(wid wmutils.WindowID) bool {
+	for _, wids := range v.views {
+		if wids[wid] {
+			return true
+		}
+	}
+	return false
 }
 
 func (v *view) Include(wid wmutils.WindowID, n int) {
