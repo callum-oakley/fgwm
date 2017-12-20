@@ -85,9 +85,9 @@ func Focus(wid WindowID) error {
 	return exec.Command("wtf", wid.String()).Run()
 }
 
-// Kills the window with the given ID. Wraps killw.
+// Kills the window with the given ID. Wraps killw -p.
 func Kill(wid WindowID) error {
-	return exec.Command("killw", wid.String()).Run()
+	return exec.Command("killw", "-p", wid.String()).Run()
 }
 
 // Teleports the window with given ID to the given position, and resizes it to
