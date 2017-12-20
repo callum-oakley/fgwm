@@ -30,7 +30,7 @@ func Run(config *Config) error {
 	s := &Server{config.Name, g}
 	rpc.Register(s)
 	rpc.HandleHTTP()
-	// TODO replace with named pipes
+	// TODO replace with named pipes(?) or unix sockets(?) or something
 	listener, err := net.Listen("tcp", ":62676")
 	if err != nil {
 		return err
