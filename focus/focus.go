@@ -1,7 +1,7 @@
 package focus
 
 import (
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/hot-leaf-juice/fgwm/wmutils"
@@ -15,6 +15,7 @@ type Focus interface {
 	Unset(wid wmutils.WindowID) error
 	Next() error
 	Prev() error
+	Top() error
 }
 
 type focus struct {
@@ -62,8 +63,12 @@ func (f *focus) update() {
 }
 
 func (f *focus) Get() (wmutils.WindowID, error) {
-	if len(f.wids) == 0 {
-		return 0, errors.New("No windows")
+	if f.i >= len(f.wids) {
+		return 0, fmt.Errorf(
+			"index is %v but we only have %v wids!",
+			f.i,
+			len(f.wids),
+		)
 	}
 	return f.wids[f.i], nil
 }
@@ -71,6 +76,7 @@ func (f *focus) Get() (wmutils.WindowID, error) {
 func (f *focus) Register(wid wmutils.WindowID) error {
 	if index(wid, f.wids) < 0 {
 		f.wids = append([]wmutils.WindowID{wid}, f.wids...)
+		f.i = 0
 		return f.Set(wid)
 	}
 	return nil
@@ -79,7 +85,7 @@ func (f *focus) Register(wid wmutils.WindowID) error {
 func (f *focus) Unregister(wid wmutils.WindowID) error {
 	if i := index(wid, f.wids); i >= 0 {
 		f.wids = append(f.wids[:i], f.wids[i+1:]...)
-		return f.focusTop()
+		return f.Top()
 	}
 	return nil
 }
@@ -110,12 +116,12 @@ func (f *focus) Set(wid wmutils.WindowID) error {
 func (f *focus) Unset(wid wmutils.WindowID) error {
 	w, err := f.Get()
 	if err != nil || w == wid {
-		return f.focusTop()
+		return f.Top()
 	}
 	return nil
 }
 
-func (f *focus) focusTop() error {
+func (f *focus) Top() error {
 	if len(f.wids) == 0 {
 		return nil
 	}

@@ -27,7 +27,10 @@ func (g *Grid) ViewInclude(n int) error {
 }
 
 func (g *Grid) ViewSet(n int) error {
-	return g.view.Set(n)
+	if err := g.view.Set(n); err != nil {
+		return err
+	}
+	return g.focus.Top()
 }
 
 func (g *Grid) Snap() error {

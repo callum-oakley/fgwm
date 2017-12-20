@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -36,7 +35,7 @@ func Run(config *Config) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%v: listening on localhost:62676\n", s.name)
+	log.Printf("%v: listening on localhost:62676\n", s.name)
 	http.Serve(listener, nil)
 	return nil
 }
