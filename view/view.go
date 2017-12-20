@@ -4,7 +4,7 @@ import "github.com/hot-leaf-juice/fgwm/wmutils"
 
 type View interface {
 	Register(wid wmutils.WindowID)
-	Unregister(wid wmutils.WindowID)
+	Unregister(wid wmutils.WindowID) error
 	UnregisterAll(wid wmutils.WindowID)
 	IsRegistered(wid wmutils.WindowID) bool
 	Include(wid wmutils.WindowID, n int) // Include wid in view n
@@ -37,8 +37,9 @@ func (v *view) Register(wid wmutils.WindowID) {
 	v.Include(wid, v.current)
 }
 
-func (v *view) Unregister(wid wmutils.WindowID) {
+func (v *view) Unregister(wid wmutils.WindowID) error {
 	delete(v.views[v.current], wid)
+	return wmutils.Unmap(wid)
 }
 
 func (v *view) UnregisterAll(wid wmutils.WindowID) {

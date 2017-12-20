@@ -67,7 +67,9 @@ func (g *Grid) Kill() error {
 	if err != nil {
 		return err
 	}
-	g.view.Unregister(wid)
+	if err := g.view.Unregister(wid); err != nil {
+		return err
+	}
 	if g.view.IsRegistered(wid) {
 		return nil
 	}
