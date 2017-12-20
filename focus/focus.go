@@ -9,7 +9,7 @@ import (
 
 type Focus interface {
 	Register(wid wmutils.WindowID) error
-	Unregister(wid wmutils.WindowID)
+	Unregister(wid wmutils.WindowID) error
 	Get() (wmutils.WindowID, error)
 	Set(wid wmutils.WindowID) error
 	Unset(wid wmutils.WindowID) error
@@ -31,65 +31,64 @@ func New(
 	timeout time.Duration,
 	focussedColour, unfocussedColour wmutils.Colour,
 ) (Focus, error) {
-	m := focus{
+	f := focus{
 		timeout:          timeout,
 		focussedColour:   focussedColour,
 		unfocussedColour: unfocussedColour,
 	}
-	m.timer = time.AfterFunc(m.timeout, m.update)
+	f.timer = time.AfterFunc(f.timeout, f.update)
 	wids, err := wmutils.List()
 	if err != nil {
 		return nil, err
 	}
 	for wid := range wids {
-		if err := m.Register(wid); err != nil {
+		if err := f.Register(wid); err != nil {
 			return nil, err
 		}
 	}
-	return &m, nil
+	return &f, nil
 }
 
-func (m *focus) update() {
-	wid, err := m.Get()
+func (f *focus) update() {
+	wid, err := f.Get()
 	if err != nil {
 		return
 	}
-	for j := m.i; j > 0; j-- {
-		m.wids[j] = m.wids[j-1]
+	for j := f.i; j > 0; j-- {
+		f.wids[j] = f.wids[j-1]
 	}
-	m.i = 0
-	m.wids[0] = wid
+	f.i = 0
+	f.wids[0] = wid
 }
 
-func (m *focus) Get() (wmutils.WindowID, error) {
-	if len(m.wids) == 0 {
+func (f *focus) Get() (wmutils.WindowID, error) {
+	if len(f.wids) == 0 {
 		return 0, errors.New("No windows")
 	}
-	return m.wids[m.i], nil
+	return f.wids[f.i], nil
 }
 
-func (m *focus) Register(wid wmutils.WindowID) error {
-	if index(wid, m.wids) < 0 {
-		m.wids = append([]wmutils.WindowID{wid}, m.wids...)
-		return m.Set(wid)
+func (f *focus) Register(wid wmutils.WindowID) error {
+	if index(wid, f.wids) < 0 {
+		f.wids = append([]wmutils.WindowID{wid}, f.wids...)
+		return f.Set(wid)
 	}
 	return nil
 }
 
-func (m *focus) Unregister(wid wmutils.WindowID) {
-	if i := index(wid, m.wids); i >= 0 {
-		m.wids = append(m.wids[:i], m.wids[i+1:]...)
-		if i <= m.i {
-			m.i--
-		}
+func (f *focus) Unregister(wid wmutils.WindowID) error {
+	if i := index(wid, f.wids); i >= 0 {
+		f.wids = append(f.wids[:i], f.wids[i+1:]...)
+		return f.focusTop()
 	}
+	return nil
 }
 
-func (m *focus) Set(wid wmutils.WindowID) error {
-	m.timer.Stop()
-	for j := 0; j < len(m.wids); j++ {
-		if j != m.i {
-			err := wmutils.SetBorderColour(m.wids[j], m.unfocussedColour)
+func (f *focus) Set(wid wmutils.WindowID) error {
+	f.timer.Stop()
+	for j := 0; j < len(f.wids); j++ {
+		if j != f.i {
+			err := wmutils.SetBorderColour(f.wids[j], f.unfocussedColour)
 			if err != nil {
 				return err
 			}
@@ -101,63 +100,63 @@ func (m *focus) Set(wid wmutils.WindowID) error {
 	if err := wmutils.Raise(wid); err != nil {
 		return err
 	}
-	if err := wmutils.SetBorderColour(wid, m.focussedColour); err != nil {
+	if err := wmutils.SetBorderColour(wid, f.focussedColour); err != nil {
 		return err
 	}
-	m.timer.Reset(m.timeout)
+	f.timer.Reset(f.timeout)
 	return nil
 }
 
-func (m *focus) Unset(wid wmutils.WindowID) error {
-	w, err := m.Get()
+func (f *focus) Unset(wid wmutils.WindowID) error {
+	w, err := f.Get()
 	if err != nil || w == wid {
-		return m.focusTop()
+		return f.focusTop()
 	}
 	return nil
 }
 
-func (m *focus) focusTop() error {
-	if len(m.wids) == 0 {
+func (f *focus) focusTop() error {
+	if len(f.wids) == 0 {
 		return nil
 	}
 	visible, err := wmutils.List()
 	if err != nil {
 		return err
 	}
-	for m.i = 0; m.i < len(m.wids); m.i++ {
-		if visible[m.wids[m.i]] {
-			return m.Set(m.wids[m.i])
+	for f.i = 0; f.i < len(f.wids); f.i++ {
+		if visible[f.wids[f.i]] {
+			return f.Set(f.wids[f.i])
 		}
 	}
 	return nil
 }
 
-func (m *focus) focusFunc(f func(int) int) error {
-	if len(m.wids) == 0 {
+func (f *focus) focusFunc(g func(int) int) error {
+	if len(f.wids) == 0 {
 		return nil
 	}
 	visible, err := wmutils.List()
 	if err != nil {
 		return err
 	}
-	for j := 0; j == 0 || !visible[m.wids[m.i]]; j++ {
-		m.i = f(m.i)
-		if j == len(m.wids) {
+	for j := 0; j == 0 || !visible[f.wids[f.i]]; j++ {
+		f.i = g(f.i)
+		if j == len(f.wids) {
 			return nil
 		}
 	}
-	return m.Set(m.wids[m.i])
+	return f.Set(f.wids[f.i])
 }
 
-func (m *focus) Next() error {
-	return m.focusFunc(func(i int) int {
-		return (i + 1) % len(m.wids)
+func (f *focus) Next() error {
+	return f.focusFunc(func(i int) int {
+		return (i + 1) % len(f.wids)
 	})
 }
 
-func (m *focus) Prev() error {
-	return m.focusFunc(func(i int) int {
-		return (i + len(m.wids) - 1) % len(m.wids)
+func (f *focus) Prev() error {
+	return f.focusFunc(func(i int) int {
+		return (i + len(f.wids) - 1) % len(f.wids)
 	})
 }
 

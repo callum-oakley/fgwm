@@ -49,16 +49,14 @@ func (v *view) Include(wid wmutils.WindowID, n int) {
 }
 
 func (v *view) Set(n int) error {
-	for m, wids := range v.views {
-		if n == m {
-			if err := forEach(wmutils.Map, wids); err != nil {
-				return err
-			}
-		} else {
-			if err := forEach(wmutils.Unmap, wids); err != nil {
-				return err
-			}
+	v.current = n
+	for _, wids := range v.views {
+		if err := forEach(wmutils.Unmap, wids); err != nil {
+			return err
 		}
+	}
+	if err := forEach(wmutils.Map, v.views[v.current]); err != nil {
+		return err
 	}
 	return nil
 }

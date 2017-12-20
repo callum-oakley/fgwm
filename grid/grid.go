@@ -134,6 +134,11 @@ func New(opts *Options) (*Grid, error) {
 	if err != nil {
 		return nil, err
 	}
+	// TODO pull out to configuration
+	view, err := view.New(1)
+	if err != nil {
+		return nil, err
+	}
 	return &Grid{
 		screen:     screen,
 		margin:     margin,
@@ -143,6 +148,7 @@ func New(opts *Options) (*Grid, error) {
 		size:       opts.Size,
 		fullscreen: map[wmutils.WindowID]Rectangle{},
 		focus:      focus,
+		view:       view,
 	}, nil
 }
 
@@ -158,7 +164,9 @@ func (g *Grid) WatchWindowEvents() error {
 			}
 		case wmutils.DestroyNotifyEvent:
 			delete(g.fullscreen, ev.WID)
-			g.focus.Unregister(ev.WID)
+			if err := g.focus.Unregister(ev.WID); err != nil {
+				return err
+			}
 			g.view.Unregister(ev.WID)
 		case wmutils.UnmapNotifyEvent:
 			if err := g.focus.Unset(ev.WID); err != nil {
