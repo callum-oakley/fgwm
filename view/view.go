@@ -11,16 +11,21 @@ type View interface {
 	Set(n int) error                     // Set the view to n
 }
 
+type windowState struct {
+	position wmutils.Position
+	size     wmutils.Size
+}
+
 type view struct {
 	current int
-	views   map[int]map[wmutils.WindowID]bool
+	views   map[int]map[wmutils.WindowID]*windowState
 }
 
 func New(start int) (View, error) {
 	v := view{
 		current: start,
-		views: map[int]map[wmutils.WindowID]bool{
-			start: map[wmutils.WindowID]bool{},
+		views: map[int]map[wmutils.WindowID]*windowState{
+			start: map[wmutils.WindowID]*windowState{},
 		},
 	}
 	wids, err := wmutils.List()
@@ -50,7 +55,7 @@ func (v *view) UnregisterAll(wid wmutils.WindowID) {
 
 func (v *view) IsRegistered(wid wmutils.WindowID) bool {
 	for _, wids := range v.views {
-		if wids[wid] {
+		if _, ok := wids[wid]; ok {
 			return true
 		}
 	}
@@ -59,30 +64,30 @@ func (v *view) IsRegistered(wid wmutils.WindowID) bool {
 
 func (v *view) Include(wid wmutils.WindowID, n int) {
 	if _, ok := v.views[n]; !ok {
-		v.views[n] = map[wmutils.WindowID]bool{}
+		v.views[n] = map[wmutils.WindowID]*windowState{}
 	}
-	v.views[n][wid] = true
+	v.views[n][wid] = nil
 }
 
 func (v *view) Set(n int) error {
-	v.current = n
-	for _, wids := range v.views {
-		if err := forEach(wmutils.Unmap, wids); err != nil {
+	for wid := range v.views[v.current] {
+		if err := wmutils.Unmap(wid); err != nil {
 			return err
 		}
+		position, size, err := wmutils.GetAttributes(wid)
+		if err != nil {
+			return err
+		}
+		v.views[v.current][wid] = &windowState{position, size}
 	}
-	if err := forEach(wmutils.Map, v.views[v.current]); err != nil {
-		return err
-	}
-	return nil
-}
-
-func forEach(
-	f func(wmutils.WindowID) error,
-	wids map[wmutils.WindowID]bool,
-) error {
-	for wid := range wids {
-		if err := f(wid); err != nil {
+	v.current = n
+	for wid, ws := range v.views[v.current] {
+		if ws != nil {
+			if err := wmutils.Teleport(wid, ws.position, ws.size); err != nil {
+				return err
+			}
+		}
+		if err := wmutils.Map(wid); err != nil {
 			return err
 		}
 	}
