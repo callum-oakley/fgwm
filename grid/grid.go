@@ -83,12 +83,9 @@ type Grid struct {
 	// the pixel locations of the cell boundaries
 	points map[Position]wmutils.Position
 	// the size of the grid in cells
-	size Size
-	// the old positions of any full screen windows
-	// TODO package fullscreen up like focus and view
-	fullscreen map[wmutils.WindowID]Rectangle
-	focus      focus.Focus
-	view       view.View
+	size  Size
+	focus focus.Focus
+	view  view.View
 }
 
 // The sizes that define the grid layout are made up as follows (bd is border).
@@ -105,6 +102,7 @@ type Options struct {
 	Border                           wmutils.Pixels
 	MinMargin, Pad                   wmutils.Size
 	Size                             Size
+	InitialView                      int
 	FocusTimeout                     time.Duration
 	FocussedColour, UnfocussedColour wmutils.Colour
 }
@@ -134,21 +132,19 @@ func New(opts *Options) (*Grid, error) {
 	if err != nil {
 		return nil, err
 	}
-	// TODO pull out to configuration
-	view, err := view.New(1)
+	view, err := view.New(screen, opts.Border, opts.InitialView)
 	if err != nil {
 		return nil, err
 	}
 	return &Grid{
-		screen:     screen,
-		margin:     margin,
-		border:     opts.Border,
-		pad:        opts.Pad,
-		cell:       cell,
-		size:       opts.Size,
-		fullscreen: map[wmutils.WindowID]Rectangle{},
-		focus:      focus,
-		view:       view,
+		screen: screen,
+		margin: margin,
+		border: opts.Border,
+		pad:    opts.Pad,
+		cell:   cell,
+		size:   opts.Size,
+		focus:  focus,
+		view:   view,
 	}, nil
 }
 
@@ -162,8 +158,10 @@ func (g *Grid) WatchWindowEvents() error {
 			if err := g.centerWID(ev.WID); err != nil {
 				return err
 			}
+			if err := wmutils.SetBorderWidth(ev.WID, g.border); err != nil {
+				return err
+			}
 		case wmutils.DestroyNotifyEvent:
-			delete(g.fullscreen, ev.WID)
 			if err := g.focus.Unregister(ev.WID); err != nil {
 				return err
 			}

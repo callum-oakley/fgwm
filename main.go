@@ -23,6 +23,7 @@ func main() {
 			MinMargin:        wmutils.Size{10, 10},
 			Pad:              wmutils.Size{10, 10},
 			Size:             grid.Size{24, 24},
+			InitialView:      1,
 			FocusTimeout:     time.Second,
 			FocussedColour:   0xd8dee9,
 			UnfocussedColour: 0x65737e,

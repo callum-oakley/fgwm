@@ -50,16 +50,7 @@ func (g *Grid) Fullscreen() error {
 	if err != nil {
 		return err
 	}
-	if r, ok := g.fullscreen[wid]; ok {
-		return g.teleportWID(wid, r)
-	}
-	r, err := g.getRectangle(wid)
-	if err != nil {
-		return err
-	}
-	g.fullscreen[wid] = r
-	wmutils.SetBorderWidth(wid, 0)
-	return wmutils.Teleport(wid, wmutils.Position{}, g.screen)
+	return g.view.Fullscreen(wid)
 }
 
 func (g *Grid) Kill() error {

@@ -74,8 +74,7 @@ func (g *Grid) centerWID(wid wmutils.WindowID) error {
 }
 
 func (g *Grid) teleportWID(wid wmutils.WindowID, r Rectangle) error {
-	wmutils.SetBorderWidth(wid, g.border)
-	delete(g.fullscreen, wid)
+	g.view.Unfullscreen(wid)
 	if !g.inGrid(r) || !r.Valid() {
 		return nil
 	}
