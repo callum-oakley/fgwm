@@ -109,6 +109,8 @@ func Raise(wid WindowID) error {
 	return exec.Command("chwso", "-r", wid.String()).Run()
 }
 
+// SetBorderWidth sets the width of the border for the window with the given
+// ID. Wraps chwb -s.
 func SetBorderWidth(wid WindowID, width Pixels) error {
 	return exec.Command(
 		"chwb",
@@ -118,6 +120,8 @@ func SetBorderWidth(wid WindowID, width Pixels) error {
 	).Run()
 }
 
+// SetBorderColour sets the colour of the border for the window with the given
+// ID. Wraps chwb -c.
 func SetBorderColour(wid WindowID, colour Colour) error {
 	return exec.Command("chwb", "-c", colour.String(), wid.String()).Run()
 }
