@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -30,12 +32,16 @@ func Run(config *Config) error {
 	s := &Server{config.Name, g}
 	rpc.Register(s)
 	rpc.HandleHTTP()
-	// TODO replace with named pipes(?) or unix sockets(?) or something
-	listener, err := net.Listen("tcp", ":62676")
+	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
 		return err
 	}
-	log.Printf("%v: listening on localhost:62676\n", s.name)
+	port := listener.Addr().(*net.TCPAddr).Port
+	err = ioutil.WriteFile("/tmp/fgwm-port", []byte(fmt.Sprint(port)), 0666)
+	if err != nil {
+		return err
+	}
+	log.Printf("%v: listening on localhost:%v\n", s.name, port)
 	http.Serve(listener, nil)
 	return nil
 }

@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/rpc"
 	"os"
@@ -17,7 +18,11 @@ type client struct {
 
 func Run(args []string) {
 	c := client{args[0]}
-	conn, err := rpc.DialHTTP("tcp", "localhost:62676")
+	port, err := ioutil.ReadFile("/tmp/fgwm-port")
+	if err != nil {
+		log.Fatalf("%v: %v", c.name, err)
+	}
+	conn, err := rpc.DialHTTP("tcp", fmt.Sprintf("localhost:%s", port))
 	if err != nil {
 		log.Fatalf("%v: %v", c.name, err)
 	}
