@@ -2,6 +2,7 @@ package grid
 
 import (
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/hot-leaf-juice/fgwm/focus"
@@ -86,6 +87,7 @@ type Grid struct {
 	size  Size
 	focus focus.Focus
 	view  view.View
+	mux   sync.Mutex
 }
 
 // The sizes that define the grid layout are made up as follows (bd is border).
@@ -155,26 +157,34 @@ func (g *Grid) WatchWindowEvents() error {
 			// Wait for a tick so that the window's self imposed size has a
 			// chance to settle
 			time.Sleep(100 * time.Millisecond)
+			g.mux.Lock()
 			if err := g.centerWID(ev.WID); err != nil {
 				return err
 			}
 			if err := wmutils.SetBorderWidth(ev.WID, g.border); err != nil {
 				return err
 			}
+			g.mux.Unlock()
 		case wmutils.DestroyNotifyEvent:
+			g.mux.Lock()
 			if err := g.focus.Unregister(ev.WID); err != nil {
 				return err
 			}
 			g.view.UnregisterAll(ev.WID)
+			g.mux.Unlock()
 		case wmutils.UnmapNotifyEvent:
+			g.mux.Lock()
 			if err := g.focus.Unset(ev.WID); err != nil {
 				return err
 			}
+			g.mux.Unlock()
 		case wmutils.MapNotifyEvent:
+			g.mux.Lock()
 			if err := g.focus.Register(ev.WID); err != nil {
 				return err
 			}
 			g.view.Register(ev.WID)
+			g.mux.Unlock()
 		}
 	}
 	return errors.New("Window event channel closed!")

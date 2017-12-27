@@ -7,6 +7,8 @@ import (
 )
 
 func (g *Grid) Focus(strategy FocusStrategy) error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
 	switch strategy {
 	case Next:
 		return g.focus.Next()
@@ -18,6 +20,8 @@ func (g *Grid) Focus(strategy FocusStrategy) error {
 }
 
 func (g *Grid) ViewInclude(n int) error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
 	wid, err := g.focus.Get()
 	if err != nil {
 		return err
@@ -27,6 +31,8 @@ func (g *Grid) ViewInclude(n int) error {
 }
 
 func (g *Grid) ViewSet(n int) error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
 	if err := g.view.Set(n); err != nil {
 		return err
 	}
@@ -38,6 +44,8 @@ func (g *Grid) Snap() error {
 }
 
 func (g *Grid) Center() error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
 	wid, err := g.focus.Get()
 	if err != nil {
 		return err
@@ -46,6 +54,8 @@ func (g *Grid) Center() error {
 }
 
 func (g *Grid) Fullscreen() error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
 	wid, err := g.focus.Get()
 	if err != nil {
 		return err
@@ -54,6 +64,8 @@ func (g *Grid) Fullscreen() error {
 }
 
 func (g *Grid) Kill() error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
 	wid, err := g.focus.Get()
 	if err != nil {
 		return err
@@ -68,6 +80,8 @@ func (g *Grid) Kill() error {
 }
 
 func (g *Grid) Move(diff Size) error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
 	wid, err := g.focus.Get()
 	if err != nil {
 		return err
@@ -80,6 +94,8 @@ func (g *Grid) Move(diff Size) error {
 }
 
 func (g *Grid) Grow(diff Size) error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
 	wid, err := g.focus.Get()
 	if err != nil {
 		return err
@@ -101,6 +117,8 @@ func (g *Grid) Grow(diff Size) error {
 }
 
 func (g *Grid) Throw(direction Direction) error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
 	wid, err := g.focus.Get()
 	if err != nil {
 		return err
@@ -137,6 +155,8 @@ func (g *Grid) Throw(direction Direction) error {
 }
 
 func (g *Grid) Spread(direction Direction) error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
 	wid, err := g.focus.Get()
 	if err != nil {
 		return err
@@ -172,6 +192,8 @@ func (g *Grid) Spread(direction Direction) error {
 }
 
 func (g *Grid) Teleport(r Rectangle) error {
+	g.mux.Lock()
+	defer g.mux.Unlock()
 	wid, err := g.focus.Get()
 	if err != nil {
 		return err
