@@ -16,20 +16,15 @@ type Server struct {
 	grid *grid.Grid
 }
 
-type Config struct {
-	Name string
-	Grid *grid.Options
-}
-
-func Run(config *Config) error {
-	g, err := grid.New(config.Grid)
+func Run(name string, options *grid.Options) error {
+	g, err := grid.New(options)
 	if err != nil {
 		return err
 	}
 	go func() {
 		log.Fatal(g.WatchWindowEvents())
 	}()
-	s := &Server{config.Name, g}
+	s := &Server{name, g}
 	rpc.Register(s)
 	rpc.HandleHTTP()
 	listener, err := net.Listen("tcp", ":0")

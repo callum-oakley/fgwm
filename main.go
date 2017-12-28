@@ -16,18 +16,15 @@ func main() {
 		client.Run(os.Args)
 		return
 	}
-	if err := server.Run(&server.Config{
-		Name: os.Args[0],
-		Grid: &grid.Options{
-			Border:           5,
-			MinMargin:        wmutils.Size{10, 10},
-			Pad:              wmutils.Size{10, 10},
-			Size:             grid.Size{24, 24},
-			InitialView:      1,
-			FocusTimeout:     time.Second,
-			FocussedColour:   0xd8dee9,
-			UnfocussedColour: 0x65737e,
-		},
+	if err := server.Run(os.Args[0], &grid.Options{
+		Border:           5,
+		MinMargin:        wmutils.Size{10, 10},
+		Pad:              wmutils.Size{10, 10},
+		Size:             grid.Size{24, 24},
+		InitialView:      1,
+		FocusTimeout:     time.Second,
+		FocussedColour:   0xd8dee9,
+		UnfocussedColour: 0x65737e,
 	}); err != nil {
 		log.Fatal(err)
 	}
