@@ -11,14 +11,18 @@ import (
 )
 
 func main() {
-	if len(os.Args) >= 2 {
+	if len(os.Args) >= 2 && os.Args[1] != "-c" && os.Args[1] != "--config" {
 		client.Run(os.Args)
 		return
 	}
-	options, err := config.Load(fmt.Sprintf(
+	configPath := fmt.Sprintf(
 		"%v/.config/fgwm/fgwm.toml",
 		os.Getenv("HOME"),
-	))
+	)
+	if len(os.Args) >= 3 && (os.Args[1] == "-c" || os.Args[1] == "--config") {
+		configPath = os.Args[2]
+	}
+	options, err := config.Load(configPath)
 	if err != nil {
 		log.Fatalf("%v: %v\n", os.Args[0], err)
 	}
