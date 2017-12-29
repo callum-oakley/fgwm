@@ -25,8 +25,8 @@ func (g *Grid) getRectangle(wid wmutils.WindowID) (Rectangle, error) {
 
 func (g *Grid) closestPoint(p wmutils.Position) Position {
 	return Position{
-		X: round((float64(p.X - g.margin.W)) / float64(g.cell.W)),
-		Y: round((float64(p.Y - g.margin.H)) / float64(g.cell.H)),
+		X: round((float64(p.X - g.margins.Left)) / float64(g.cell.W)),
+		Y: round((float64(p.Y - g.margins.Top)) / float64(g.cell.H)),
 	}
 }
 
@@ -51,8 +51,8 @@ func (g *Grid) pixelSize(size Size) wmutils.Size {
 
 func (g *Grid) pixelPosition(pos Position) wmutils.Position {
 	return wmutils.Position{
-		X: g.margin.W + wmutils.Pixels(pos.X)*g.cell.W,
-		Y: g.margin.H + wmutils.Pixels(pos.Y)*g.cell.H,
+		X: g.margins.Left + wmutils.Pixels(pos.X)*g.cell.W,
+		Y: g.margins.Top + wmutils.Pixels(pos.Y)*g.cell.H,
 	}
 }
 

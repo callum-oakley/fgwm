@@ -1,0 +1,28 @@
+# Colours for the borders of focussed and unfocussed windows -- in rgb hex.
+focussed_colour = 0xd8dee9 # off white
+unfocussed_colour = 0x65737e # greyish
+
+# The width of the border around each window -- in pixels.
+border = 5
+
+# The empty padding around each cell of the grid (width and height can be
+# defined separately if you want different horizonal space than vertical) -- in
+# pixels.
+pad = { width = 10, height = 10 }
+
+# The minimum margin to leave at edge of each side of the screen (in addition
+# to window padding) -- in pixels. You might want a larger margin at one side
+# than the others in order to accomodate a bar or panel.
+margins = { top = 10, bottom = 10, left = 10, right = 10 }
+
+# The granularity with which to divide the screen. 24x24 works well for thirds
+# and halves, with nice centering and resizing.
+grid_size = { width = 24, height = 24 }
+
+# The view in which to begin. Depending on your keybindings you'll probably
+# want this to be 0 or 1, but any integer is valid.
+initial_view = 1
+
+# The time for which a window must be focussed before it is considered "most
+# recently used" -- in milliseconds.
+focus_timeout_ms = 1000

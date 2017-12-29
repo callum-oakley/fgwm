@@ -16,7 +16,7 @@ func main() {
 		return
 	}
 	configPath := fmt.Sprintf(
-		"%v/.config/fgwm/fgwm.toml",
+		"%v/.config/fgwm/config.toml",
 		os.Getenv("HOME"),
 	)
 	if len(os.Args) >= 3 && (os.Args[1] == "-c" || os.Args[1] == "--config") {

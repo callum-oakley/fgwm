@@ -70,11 +70,15 @@ func (r Rectangle) Valid() bool {
 	return r.TopLeft.X < r.BottomRight.X && r.TopLeft.Y < r.BottomRight.Y
 }
 
+type Margins struct {
+	Top, Bottom, Left, Right wmutils.Pixels
+}
+
 type Grid struct {
 	// size of the screen
 	screen wmutils.Size
-	// margin at edge of screen
-	margin wmutils.Size
+	// margin at each edge of the screen
+	margins Margins
 	// padding around cells
 	pad wmutils.Size
 	// border around cells
@@ -102,7 +106,8 @@ type Grid struct {
 
 type Options struct {
 	Border                           wmutils.Pixels
-	MinMargin, Pad                   wmutils.Size
+	Margins                          Margins
+	Pad                              wmutils.Size
 	Size                             Size
 	InitialView                      int
 	FocusTimeout                     time.Duration
@@ -119,12 +124,21 @@ func New(opts *Options) (*Grid, error) {
 		return nil, err
 	}
 	cell := wmutils.Size{
-		W: (screen.W - 2*opts.MinMargin.W) / wmutils.Pixels(opts.Size.W),
-		H: (screen.H - 2*opts.MinMargin.H) / wmutils.Pixels(opts.Size.H),
+		W: (screen.W - opts.Margins.Left - opts.Margins.Right) /
+			wmutils.Pixels(opts.Size.W),
+		H: (screen.H - opts.Margins.Top - opts.Margins.Bottom) /
+			wmutils.Pixels(opts.Size.H),
 	}
-	margin := wmutils.Size{
-		W: (screen.W - wmutils.Pixels(opts.Size.W)*cell.W) / 2,
-		H: (screen.H - wmutils.Pixels(opts.Size.H)*cell.H) / 2,
+	// Absorb any excess pixels resulting from rounding in to the margins
+	extraMarginW := screen.W - wmutils.Pixels(opts.Size.W)*cell.W -
+		opts.Margins.Left - opts.Margins.Right
+	extraMarginH := screen.H - wmutils.Pixels(opts.Size.H)*cell.H -
+		opts.Margins.Top - opts.Margins.Bottom
+	margins := Margins{
+		Top:    opts.Margins.Top + extraMarginH/2,
+		Bottom: opts.Margins.Bottom + extraMarginH/2,
+		Left:   opts.Margins.Left + extraMarginW/2,
+		Right:  opts.Margins.Right + extraMarginW/2,
 	}
 	focus, err := focus.New(
 		opts.FocusTimeout,
@@ -139,14 +153,14 @@ func New(opts *Options) (*Grid, error) {
 		return nil, err
 	}
 	return &Grid{
-		screen: screen,
-		margin: margin,
-		border: opts.Border,
-		pad:    opts.Pad,
-		cell:   cell,
-		size:   opts.Size,
-		focus:  focus,
-		view:   view,
+		screen:  screen,
+		margins: margins,
+		border:  opts.Border,
+		pad:     opts.Pad,
+		cell:    cell,
+		size:    opts.Size,
+		focus:   focus,
+		view:    view,
 	}, nil
 }
 
