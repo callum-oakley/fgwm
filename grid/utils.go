@@ -16,16 +16,22 @@ func (g *Grid) getRectangle(wid wmutils.WindowID) (Rectangle, error) {
 		)
 	}
 	return Rectangle{
-		g.closestPoint(pPos),
-		g.closestPoint(pPos.Offset(pSize)),
+		g.closestPoint(pPos.Offset(g.pad.Scale(-1))),
+		g.closestPoint(pPos.Offset(pSize.Add(
+			g.pad.Add(wmutils.Size{g.border, g.border}),
+		))),
 	}, nil
 }
 
 func (g *Grid) closestPoint(p wmutils.Position) Position {
 	return Position{
-		X: int((p.X - g.margin.W + g.cell.W/2) / g.cell.W),
-		Y: int((p.Y - g.margin.H + g.cell.H/2) / g.cell.H),
+		X: round((float64(p.X - g.margin.W)) / float64(g.cell.W)),
+		Y: round((float64(p.Y - g.margin.H)) / float64(g.cell.H)),
 	}
+}
+
+func round(x float64) int {
+	return int(x + 0.5)
 }
 
 func (g *Grid) pInGrid(p Position) bool {
