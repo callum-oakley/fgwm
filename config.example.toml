@@ -25,4 +25,4 @@ initial_view = 1
 
 # The time for which a window must be focussed before it is considered "most
 # recently used" -- in milliseconds.
-focus_timeout_ms = 1000
+focus_timeout_ms = 500
