@@ -153,14 +153,22 @@ func (c client) rectangleArg(args []string) grid.Rectangle {
 
 func (c client) printHelpAndExit(args []string) {
 	// TODO improve this (including command specific help)
-	if len(args) == 0 {
-		fmt.Printf("Usage:\n\n\t%v command [arguments]\n\n", c.name)
-		fmt.Println("Where command is one of:\n")
-		fmt.Println(
-			"\tsnap, move, grow, center, throw, spred, teleport, kill, help",
-		)
-	} else {
-		fmt.Printf("help for %v coming soon!\n", args[0])
-	}
+	fmt.Printf("Usage:\n\n\t%v command [arguments]\n\n", c.name)
+	fmt.Println("Where command is one of:\n")
+	fmt.Println("\tcenter")
+	fmt.Println("\tfocus")
+	fmt.Println("\tfullscreen")
+	fmt.Println("\tgrow")
+	fmt.Println("\tkill")
+	fmt.Println("\tmove")
+	fmt.Println("\tsnap")
+	fmt.Println("\tspread")
+	fmt.Println("\tteleport")
+	fmt.Println("\tthrow")
+	fmt.Println("\tview-include")
+	fmt.Println("\tview-set")
+	fmt.Println("\thelp")
+	fmt.Println("\nRunning with no commands starts the daemon:\n")
+	fmt.Printf("\t %v [--config|-c FILE]\n", c.name)
 	os.Exit(0)
 }
