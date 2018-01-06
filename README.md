@@ -158,6 +158,16 @@ the current view.
 
 The initial view can be changed with the `initial_view` option (`1` by default).
 
+## Screenshots
+
+A single centered window
+
+![](screenshots/0.png)
+
+That same window as part of a different view
+
+![](screenshots/1.png)
+
 [0]: https://github.com/wmutils
 [1]: https://github.com/wmutils/core
 [2]: https://github.com/wmutils/opt
