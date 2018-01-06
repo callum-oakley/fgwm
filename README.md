@@ -136,6 +136,9 @@ stack as far back as you like. `fgwm focus prev` moves back up the stack, and
 is for situations where you accidentally focus past the window you wanted and
 don't have to loop all the way back around.
 
+Focus changing only takes place within the currently active view (see below),
+windows in other views are ignored.
+
 ## Views
 
 *Views* are similar to *desktops*, *workspaces*, or *groups* found in most
