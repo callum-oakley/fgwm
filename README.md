@@ -99,8 +99,8 @@ the screen.
 
 Move and resize the window so that it occupies the rectangle with top left
 corner at `(a, b)`, and bottom left at, `(c, d)`. The top left corner is `(0,
-0)`. e.g. `fgwm teleport 6 0 18 24` resizes the window to take up a third of
-the screen, and places it centrally, in a `24x24` grid.
+0)`. e.g. `fgwm teleport 6 0 18 24` resizes the window to take up a half of the
+screen, and places it centrally, in a `24x24` grid.
 
     fgwm throw direction
 
@@ -133,8 +133,8 @@ position in the stack is reset.
 This allows a single call of `fgwm focus next` to swap between your two most
 recently used windows, while multiple calls can be used to traverse the window
 stack as far back as you like. `fgwm focus prev` moves back up the stack, and
-is for situations where you accidentally focus past the window you wanted and
-don't have to loop all the way back around.
+is for situations where you accidentally focus past the window you wanted, so
+that you don't have to loop all the way back around.
 
 Focus changing only takes place within the currently active view (see below),
 windows in other views are ignored.
