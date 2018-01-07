@@ -3,14 +3,22 @@ package view
 import "github.com/hot-leaf-juice/fgwm/wmutils"
 
 type View interface {
-	Register(wid wmutils.WindowID)           // Register wid with the current view
-	Unregister(wid wmutils.WindowID) error   // Unregister wid from the current view
-	UnregisterAll(wid wmutils.WindowID)      // Unregister wid from all views
-	IsRegistered(wid wmutils.WindowID) bool  // true if wid is registered in any view
-	Include(wid wmutils.WindowID, n int)     // Include wid in view n
-	Set(n int) error                         // Set the view to n
-	Fullscreen(wid wmutils.WindowID) error   // Toggle fullsceen for wid
-	Unfullscreen(wid wmutils.WindowID) error // Mark wid as not fullscreen
+	// Register wid with the current view
+	Register(wid wmutils.WindowID)
+	// Unregister wid from the current view
+	Unregister(wid wmutils.WindowID) error
+	// Unregister wid from all views
+	UnregisterAll(wid wmutils.WindowID)
+	// true if wid is registered in any view
+	IsRegistered(wid wmutils.WindowID) bool
+	// Include wid in view n
+	Include(wid wmutils.WindowID, n int)
+	// Set the view to n
+	Set(n int) error
+	// Toggle fullsceen for wid
+	Fullscreen(wid wmutils.WindowID) error
+	// Mark wid as not fullscreen
+	Unfullscreen(wid wmutils.WindowID) error
 }
 
 type windowState struct {

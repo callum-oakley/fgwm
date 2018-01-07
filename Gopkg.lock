@@ -2,14 +2,14 @@
 
 
 [[projects]]
+  branch = "master"
   name = "github.com/pelletier/go-toml"
   packages = ["."]
-  revision = "16398bac157da96aa88f98a2df640c7f32af1da2"
-  version = "v1.0.1"
+  revision = "0131db6d737cfbbfb678f8b7d92e55e27ce46224"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6353b2bc172d7cd66cdc4e2d0c4575a7fcece48c2fc6cc50bdc6720040eb3abe"
+  inputs-digest = "24db4362d23306bb9f47b189e41eef52cee004fb8e8808c1cc1cc08843f20344"
   solver-name = "gps-cdcl"
   solver-version = 1
