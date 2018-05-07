@@ -16,8 +16,8 @@ available in your path.
 
 You'll need a [go environment][3] and [dep][4].
 
-    $ go get -u github.com/hot-leaf-juice/fgwm
-    $ cd $GOPATH/src/github.com/hot-leaf-juice/fgwm
+    $ go get -u github.com/callum-oakley/fgwm
+    $ cd $GOPATH/src/github.com/callum-oakley/fgwm
     $ dep ensure
     $ go install
 
@@ -174,8 +174,8 @@ That same window as part of a different view
 [3]: https://golang.org/doc/install
 [4]: https://github.com/golang/dep#setup
 [5]: https://github.com/baskerville/sxhkd
-[6]: https://github.com/hot-leaf-juice/dots/blob/master/.config/sxhkd/sxhkdrc
+[6]: https://github.com/callum-oakley/dots/blob/master/.config/sxhkd/sxhkdrc
 [7]: #commands
-[8]: https://github.com/hot-leaf-juice/fgwm/blob/master/config.example.toml
+[8]: https://github.com/callum-oakley/fgwm/blob/master/config.example.toml
 [9]: #focus
 [10]: #views

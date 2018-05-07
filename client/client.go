@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hot-leaf-juice/fgwm/grid"
+	"github.com/callum-oakley/fgwm/grid"
 )
 
 type client struct {

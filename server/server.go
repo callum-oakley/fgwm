@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/rpc"
 
-	"github.com/hot-leaf-juice/fgwm/grid"
+	"github.com/callum-oakley/fgwm/grid"
 )
 
 type Server struct {

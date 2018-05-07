@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/hot-leaf-juice/fgwm/grid"
-	"github.com/hot-leaf-juice/fgwm/wmutils"
+	"github.com/callum-oakley/fgwm/grid"
+	"github.com/callum-oakley/fgwm/wmutils"
 )
 
 func Load(path string) (*grid.Options, error) {

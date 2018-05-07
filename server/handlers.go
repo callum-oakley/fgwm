@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/hot-leaf-juice/fgwm/grid"
+	"github.com/callum-oakley/fgwm/grid"
 	"log"
 )
 

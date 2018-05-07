@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hot-leaf-juice/fgwm/wmutils"
+	"github.com/callum-oakley/fgwm/wmutils"
 )
 
 type Focus interface {

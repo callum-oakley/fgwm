@@ -3,7 +3,7 @@ package grid
 import (
 	"fmt"
 
-	"github.com/hot-leaf-juice/fgwm/wmutils"
+	"github.com/callum-oakley/fgwm/wmutils"
 )
 
 func (g *Grid) getRectangle(wid wmutils.WindowID) (Rectangle, error) {

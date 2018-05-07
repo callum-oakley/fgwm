@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hot-leaf-juice/fgwm/focus"
-	"github.com/hot-leaf-juice/fgwm/view"
-	"github.com/hot-leaf-juice/fgwm/wmutils"
+	"github.com/callum-oakley/fgwm/focus"
+	"github.com/callum-oakley/fgwm/view"
+	"github.com/callum-oakley/fgwm/wmutils"
 )
 
 type Direction int

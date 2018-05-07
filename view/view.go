@@ -1,6 +1,6 @@
 package view
 
-import "github.com/hot-leaf-juice/fgwm/wmutils"
+import "github.com/callum-oakley/fgwm/wmutils"
 
 type View interface {
 	// Register wid with the current view
